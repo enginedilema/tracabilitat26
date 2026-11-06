@@ -5,6 +5,7 @@ namespace App\Livewire\Mostres;
 use App\Models\Mostra;
 use App\Models\MostraEsdeveniment;
 use App\Models\MostraProcessament;
+use App\Support\ProgresMostra;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -119,7 +120,7 @@ class Proces extends Component
             $estatAnterior = $mostra->estat;
             $estatNou = $this->calcularEstat($mostra, $registre);
             if ($estatNou !== $estatAnterior) {
-                $mostra->update(['estat' => $estatNou]);
+                $mostra->forceFill(['estat' => $estatNou])->save();
             }
 
             if ($canvis !== [] || $estatNou !== $estatAnterior) {
@@ -219,10 +220,13 @@ class Proces extends Component
     public function render(): View
     {
         $mostra = Mostra::query()->findOrFail($this->mostraId);
+        $procesDesat = MostraProcessament::query()
+            ->where('mostra_id', $mostra->id)->first();
+        $progres = ProgresMostra::calcular($mostra, $procesDesat);
         $historial = MostraEsdeveniment::query()
             ->where('mostra_id', $mostra->id)
             ->orderByDesc('id')->limit(100)->get();
 
-        return view('livewire.mostres.proces', compact('mostra', 'historial'));
+        return view('livewire.mostres.proces', compact('mostra', 'historial', 'progres'));
     }
 }

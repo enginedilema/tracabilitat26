@@ -21,6 +21,44 @@
         </span>
     </div>
 
+    {{-- Progrés del circuit: només confirmacions guardades, no edicions pendents. --}}
+    <section aria-labelledby="titol-progres" class="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-900">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h2 id="titol-progres" class="text-lg font-semibold">Progrés del processament</h2>
+                <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{{ $progres['completades'] }} de {{ $progres['total'] }} fases confirmades</p>
+            </div>
+            <strong class="text-2xl tabular-nums text-emerald-700 dark:text-emerald-400">{{ $progres['percentatge'] }}%</strong>
+        </div>
+
+        <div class="mt-4 h-3 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700"
+             role="progressbar" aria-label="Progrés del processament"
+             aria-valuemin="0" aria-valuemax="100"
+             aria-valuenow="{{ $progres['percentatge'] }}">
+            <div class="h-full rounded-full bg-emerald-600 transition-all duration-300 dark:bg-emerald-400"
+                 style="width: {{ $progres['percentatge'] }}%"></div>
+        </div>
+
+        <ol class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            @foreach ($progres['fases'] as $fase)
+                <li wire:key="fase-progres-{{ $loop->index }}" class="flex items-center gap-2 text-sm">
+                    <span aria-hidden="true" class="flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold
+                        {{ $fase['completada'] ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400' }}">
+                        {{ $fase['completada'] ? '✓' : $loop->iteration }}
+                    </span>
+                    <span class="{{ $fase['completada'] ? 'font-medium text-emerald-800 dark:text-emerald-200' : 'text-zinc-600 dark:text-zinc-400' }}">
+                        {{ $fase['nom'] }}
+                        <span class="sr-only">{{ $fase['completada'] ? 'completada' : 'pendent' }}</span>
+                    </span>
+                </li>
+            @endforeach
+        </ol>
+
+        <p class="mt-4 text-xs text-zinc-500 dark:text-zinc-400">
+            El progrés reflecteix les fases desades. Marca les confirmacions i prem «Desar processament» per actualitzar-lo.
+        </p>
+    </section>
+
     @if ($missatge !== '')
         <div role="status" class="rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">{{ $missatge }}</div>
     @endif
