@@ -11,5 +11,8 @@ Route::middleware(['auth'])->group(function () {
     Route::view('/mostres', 'mostres.index')
         ->name('mostres.index');
 });
+Route::get('/mostres/{mostra}/proces', function (\App\Models\Mostra $mostra) {
+    return view('mostres.proces', compact('mostra'));
+})->name('mostres.proces');
 
 require __DIR__.'/settings.php';

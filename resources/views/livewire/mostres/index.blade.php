@@ -23,6 +23,25 @@
             class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-600 focus:outline-none dark:border-zinc-600 dark:bg-zinc-800 dark:text-white" />
     </div>
 
+    <div class="grid gap-3 rounded-xl border border-zinc-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-4 dark:border-zinc-700 dark:bg-zinc-900">
+        <label class="block text-sm">Tipus
+            <select wire:model.live="filtreTipus" class="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-600 dark:bg-zinc-800">
+                <option value="">Tots</option><option value="citologia">Citologia</option><option value="biopsia">Biòpsia</option>
+            </select>
+        </label>
+        <label class="block text-sm">Estat
+            <select wire:model.live="filtreEstat" class="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-600 dark:bg-zinc-800">
+                <option value="">Tots</option><option value="pendent">Pendent</option><option value="rebuda">Rebuda</option><option value="en_proces">En procés</option><option value="finalitzada">Finalitzada</option><option value="arxivada">Arxivada</option>
+            </select>
+        </label>
+        <label class="block text-sm">Entrada des de
+            <input type="date" wire:model.live="filtreDesDe" class="mt-1 w-full rounded-lg border border-zinc-300 bg-transparent px-3 py-2 dark:border-zinc-600">
+        </label>
+        <label class="block text-sm">Entrada fins a
+            <input type="date" wire:model.live="filtreFins" class="mt-1 w-full rounded-lg border border-zinc-300 bg-transparent px-3 py-2 dark:border-zinc-600">
+        </label>
+    </div>
+
     <div class="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-700">
         <table class="min-w-full divide-y divide-zinc-200 text-left text-sm dark:divide-zinc-700">
             <thead class="bg-zinc-50 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
@@ -31,6 +50,7 @@
                     <th class="px-4 py-3 font-semibold">Tipus</th>
                     <th class="px-4 py-3 font-semibold">Entrada</th>
                     <th class="px-4 py-3 font-semibold">Recepció</th>
+                    <th class="px-4 py-3 font-semibold">Estat</th>
                     <th class="px-4 py-3 text-right font-semibold">Accions</th>
                 </tr>
             </thead>
@@ -47,8 +67,18 @@
                                 <span class="rounded-full bg-amber-100 px-2 py-1 text-xs text-amber-800 dark:bg-amber-950 dark:text-amber-200">Pendent</span>
                             @endif
                         </td>
+                        <td class="whitespace-nowrap px-4 py-3">
+                            <span class="rounded-full bg-zinc-100 px-2 py-1 text-xs font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
+                                {{ match ($mostra->estat) {
+                                    'pendent' => 'Pendent', 'rebuda' => 'Rebuda',
+                                    'en_proces' => 'En procés', 'finalitzada' => 'Finalitzada',
+                                    'arxivada' => 'Arxivada', default => $mostra->estat,
+                                } }}
+                            </span>
+                        </td>
                         <td class="whitespace-nowrap px-4 py-3 text-right">
                             <div class="flex justify-end gap-3">
+                                <a href="{{ route('mostres.proces', $mostra) }}" wire:navigate class="text-sm font-semibold text-emerald-700 hover:underline dark:text-emerald-400">Circuit</a>
                                 <button type="button" wire:click="consultar({{ $mostra->id }})" class="text-sm font-medium text-sky-700 hover:underline dark:text-sky-400">Veure</button>
                                 <button type="button" wire:click="editar({{ $mostra->id }})" class="text-sm font-medium text-zinc-800 hover:underline dark:text-zinc-200">Editar</button>
                                 <button type="button" wire:click="eliminar({{ $mostra->id }})" wire:confirm="Vols donar de baixa aquesta mostra?" class="text-sm font-medium text-rose-700 hover:underline dark:text-rose-400">Baixa</button>
@@ -56,7 +86,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" class="px-4 py-10 text-center text-zinc-500">No hi ha mostres que coincideixin amb la cerca.</td></tr>
+                    <tr><td colspan="6" class="px-4 py-10 text-center text-zinc-500">No hi ha mostres que coincideixin amb la cerca.</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -85,6 +115,7 @@
                     <div><dt class="font-medium">Òrgan/localització</dt><dd>{{ $consulta->organ_localitzacio ?: '—' }}</dd></div>
                 @endif
                 <div><dt class="font-medium">Recepció</dt><dd>{{ $consulta->recepcio_confirmada ? 'Confirmada' : 'Pendent' }}</dd></div>
+                <div><dt class="font-medium">Circuit</dt><dd><a href="{{ route('mostres.proces', $consulta) }}" wire:navigate class="font-semibold text-emerald-700 hover:underline">Obrir processament i historial</a></dd></div>
             </dl>
         </section>
     @endif

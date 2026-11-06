@@ -3,6 +3,9 @@
 namespace App\Livewire\Mostres;
 
 use App\Models\Mostra;
+use App\Models\MostraEsdeveniment;
+use App\Models\MostraProcessament;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -13,6 +16,10 @@ class Index extends Component
     use WithPagination;
 
     public string $cerca = '';
+    public string $filtreTipus = '';
+    public string $filtreEstat = '';
+    public string $filtreDesDe = '';
+    public string $filtreFins = '';
     public bool $formulariObert = false;
     public ?int $editantId = null;
     public ?int $consultantId = null;
@@ -37,8 +44,14 @@ class Index extends Component
         $this->resetPage();
     }
 
+    public function updatedFiltreTipus(): void { $this->resetPage(); }
+    public function updatedFiltreEstat(): void { $this->resetPage(); }
+    public function updatedFiltreDesDe(): void { $this->resetPage(); }
+    public function updatedFiltreFins(): void { $this->resetPage(); }
+
     public function crear(): void
     {
+        abort_unless(auth()->check(), 403);
         $this->reiniciarFormulari();
         $this->formulariObert = true;
         $this->consultantId = null;
@@ -46,6 +59,7 @@ class Index extends Component
 
     public function consultar(int $id): void
     {
+        abort_unless(auth()->check(), 403);
         $this->consultantId = Mostra::query()->findOrFail($id)->id;
         $this->formulariObert = false;
         $this->missatge = '';
@@ -53,6 +67,7 @@ class Index extends Component
 
     public function editar(int $id): void
     {
+        abort_unless(auth()->check(), 403);
         $mostra = Mostra::query()->findOrFail($id);
         $this->reiniciarFormulari();
 
@@ -112,12 +127,50 @@ class Index extends Component
             $dades['tipus_secundari'] = null;
         }
 
-        if ($this->editantId !== null) {
-            Mostra::query()->findOrFail($this->editantId)->update($dades);
-            $missatge = 'Mostra actualitzada correctament.';
-        } else {
-            Mostra::query()->create($dades);
-            $missatge = 'Mostra registrada correctament.';
+        $missatge = DB::transaction(function () use ($dades): string {
+            if ($this->editantId !== null) {
+                $mostra = Mostra::query()->findOrFail($this->editantId);
+                $teProces = MostraProcessament::query()->where('mostra_id', $mostra->id)->exists();
+                if ($teProces && $dades['tipus_mostra'] !== $mostra->tipus_mostra) {
+                    $this->addError('tipus_mostra', 'No es pot canviar el tipus amb un processament iniciat.');
+                    return '';
+                }
+                if ($teProces && ! $dades['recepcio_confirmada']) {
+                    $this->addError('recepcio_confirmada', 'No es pot retirar la recepció quan ja hi ha processament.');
+                    return '';
+                }
+
+                $mostra->fill($dades);
+                $camps = array_keys($mostra->getDirty());
+                $mostra->save();
+                $estatAnterior = $mostra->estat;
+                if (! $teProces) {
+                    $estatNou = $dades['recepcio_confirmada'] ? 'rebuda' : 'pendent';
+                    if ($estatAnterior !== $estatNou) {
+                        $mostra->forceFill(['estat' => $estatNou])->save();
+                    }
+                }
+
+                if ($camps !== [] || $mostra->estat !== $estatAnterior) {
+                    MostraEsdeveniment::registrar($mostra, 'mostra_actualitzada', [
+                        'camps_modificats' => $camps,
+                        'estat_anterior' => $estatAnterior,
+                        'estat_nou' => $mostra->estat,
+                    ]);
+                }
+                return 'Mostra actualitzada correctament.';
+            }
+
+            $mostra = Mostra::query()->create($dades);
+            $mostra->forceFill(['estat' => $dades['recepcio_confirmada'] ? 'rebuda' : 'pendent'])->save();
+            MostraEsdeveniment::registrar($mostra, 'mostra_registrada', [
+                'estat_nou' => $mostra->estat,
+            ]);
+            return 'Mostra registrada correctament.';
+        });
+
+        if ($missatge === '') {
+            return;
         }
 
         $this->reiniciarFormulari();
@@ -129,7 +182,13 @@ class Index extends Component
     {
         abort_unless(auth()->check(), 403);
 
-        Mostra::query()->findOrFail($id)->delete();
+        DB::transaction(function () use ($id): void {
+            $mostra = Mostra::query()->findOrFail($id);
+            MostraEsdeveniment::registrar($mostra, 'mostra_baixa', [
+                'estat_anterior' => $mostra->estat,
+            ]);
+            $mostra->delete();
+        });
 
         if ($this->consultantId === $id) {
             $this->consultantId = null;
@@ -164,10 +223,19 @@ class Index extends Component
 
     public function render(): View
     {
+        abort_unless(auth()->check(), 403);
         $cerca = trim($this->cerca);
 
         return view('livewire.mostres.index', [
             'mostres' => Mostra::query()
+                ->when(in_array($this->filtreTipus, ['citologia', 'biopsia'], true),
+                    fn ($query) => $query->where('tipus_mostra', $this->filtreTipus))
+                ->when(in_array($this->filtreEstat, ['pendent', 'rebuda', 'en_proces', 'finalitzada', 'arxivada'], true),
+                    fn ($query) => $query->where('estat', $this->filtreEstat))
+                ->when(preg_match('/^\d{4}-\d{2}-\d{2}$/', $this->filtreDesDe),
+                    fn ($query) => $query->whereDate('data_entrada', '>=', $this->filtreDesDe))
+                ->when(preg_match('/^\d{4}-\d{2}-\d{2}$/', $this->filtreFins),
+                    fn ($query) => $query->whereDate('data_entrada', '<=', $this->filtreFins))
                 ->when($cerca !== '', function ($query) use ($cerca) {
                     $query->where(function ($q) use ($cerca) {
                         $q->where('identificacio', 'like', "%{$cerca}%")
