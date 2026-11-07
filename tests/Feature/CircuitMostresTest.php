@@ -24,7 +24,7 @@ class CircuitMostresTest extends TestCase
 
     public function test_pot_iniciar_processament_de_citologia_i_registrar_actor(): void
     {
-        $usuari = User::factory()->create();
+        $usuari = User::factory()->create(['rol' => 'admin', 'actiu' => true]);
         $mostra = $this->mostra('LAB-101', 'citologia');
 
         Livewire::actingAs($usuari)->test(Proces::class, ['mostra' => $mostra])
@@ -49,7 +49,7 @@ class CircuitMostresTest extends TestCase
     {
         $mostra = $this->mostra('LAB-102', 'citologia');
 
-        Livewire::actingAs(User::factory()->create())
+        Livewire::actingAs(User::factory()->create(['rol' => 'admin', 'actiu' => true]))
             ->test(Proces::class, ['mostra' => $mostra])
             ->set('formulari.arxiu_confirmat', true)
             ->call('guardar')
@@ -66,7 +66,7 @@ class CircuitMostresTest extends TestCase
             'recepcio_confirmada' => false,
         ]);
 
-        Livewire::actingAs(User::factory()->create())
+        Livewire::actingAs(User::factory()->create(['rol' => 'admin', 'actiu' => true]))
             ->test(Proces::class, ['mostra' => $mostra])
             ->call('guardar')
             ->assertHasErrors(['formulari.descripcio_macroscopica']);
@@ -76,7 +76,7 @@ class CircuitMostresTest extends TestCase
     {
         $mostra = $this->mostra('LAB-104', 'biopsia');
 
-        Livewire::actingAs(User::factory()->create())
+        Livewire::actingAs(User::factory()->create(['rol' => 'admin', 'actiu' => true]))
             ->test(Proces::class, ['mostra' => $mostra])
             ->set('formulari.numero_blocs', '4')
             ->set('formulari.talls_per_bloc', 'Bloc 1: 4; Bloc 2: 1')
@@ -95,7 +95,7 @@ class CircuitMostresTest extends TestCase
     public function test_es_pot_arribar_a_finalitzada_i_arxivada(): void
     {
         $mostra = $this->mostra('LAB-105', 'citologia');
-        $usuari = User::factory()->create();
+        $usuari = User::factory()->create(['rol' => 'admin', 'actiu' => true]);
 
         Livewire::actingAs($usuari)->test(Proces::class, ['mostra' => $mostra])
             ->set('formulari.lliurament_confirmat', true)
@@ -119,7 +119,7 @@ class CircuitMostresTest extends TestCase
             'recepcio_confirmada' => false,
         ]);
 
-        Livewire::actingAs(User::factory()->create())
+        Livewire::actingAs(User::factory()->create(['rol' => 'admin', 'actiu' => true]))
             ->test(Index::class)
             ->set('filtreEstat', 'rebuda')
             ->assertSee('LAB-106')

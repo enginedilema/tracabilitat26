@@ -20,7 +20,7 @@ class MostresCrudTest extends TestCase
 
     public function test_un_usuari_pot_crear_una_mostra(): void
     {
-        Livewire::actingAs(User::factory()->create())
+        Livewire::actingAs(User::factory()->create(['rol' => 'admin', 'actiu' => true]))
             ->test(Index::class)
             ->call('crear')
             ->set('identificacio', 'LAB-TEST-001')
@@ -41,7 +41,7 @@ class MostresCrudTest extends TestCase
     {
         $this->mostra('LAB-DUPLICAT');
 
-        Livewire::actingAs(User::factory()->create())
+        Livewire::actingAs(User::factory()->create(['rol' => 'admin', 'actiu' => true]))
             ->test(Index::class)
             ->call('crear')
             ->set('identificacio', 'LAB-DUPLICAT')
@@ -55,7 +55,7 @@ class MostresCrudTest extends TestCase
     {
         $mostra = $this->mostra('LAB-EDITAR');
 
-        Livewire::actingAs(User::factory()->create())
+        Livewire::actingAs(User::factory()->create(['rol' => 'admin', 'actiu' => true]))
             ->test(Index::class)
             ->call('editar', $mostra->id)
             ->set('procedencia', 'Nova procedència')
@@ -73,7 +73,7 @@ class MostresCrudTest extends TestCase
         $this->mostra('LAB-TROBAR');
         $this->mostra('ALTRE-REGISTRE');
 
-        Livewire::actingAs(User::factory()->create())
+        Livewire::actingAs(User::factory()->create(['rol' => 'admin', 'actiu' => true]))
             ->test(Index::class)
             ->set('cerca', 'LAB-TROBAR')
             ->assertSee('LAB-TROBAR')
@@ -84,7 +84,7 @@ class MostresCrudTest extends TestCase
     {
         $mostra = $this->mostra('LAB-BAIXA');
 
-        Livewire::actingAs(User::factory()->create())
+        Livewire::actingAs(User::factory()->create(['rol' => 'admin', 'actiu' => true]))
             ->test(Index::class)
             ->call('eliminar', $mostra->id);
 

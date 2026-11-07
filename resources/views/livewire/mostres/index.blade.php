@@ -4,10 +4,12 @@
             <h1 class="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white">Gestió de mostres</h1>
             <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Registre de citologies i biòpsies</p>
         </div>
+        @can('create', \App\Models\Mostra::class)
         <button type="button" wire:click="crear"
             class="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200">
             + Nova mostra
         </button>
+        @endcan
     </div>
 
     @if ($missatge !== '')
@@ -80,8 +82,12 @@
                             <div class="flex justify-end gap-3">
                                 <a href="{{ route('mostres.proces', $mostra) }}" wire:navigate class="text-sm font-semibold text-emerald-700 hover:underline dark:text-emerald-400">Circuit</a>
                                 <button type="button" wire:click="consultar({{ $mostra->id }})" class="text-sm font-medium text-sky-700 hover:underline dark:text-sky-400">Veure</button>
+                                @can('update', $mostra)
                                 <button type="button" wire:click="editar({{ $mostra->id }})" class="text-sm font-medium text-zinc-800 hover:underline dark:text-zinc-200">Editar</button>
+                                @endcan
+                                @can('delete', $mostra)
                                 <button type="button" wire:click="eliminar({{ $mostra->id }})" wire:confirm="Vols donar de baixa aquesta mostra?" class="text-sm font-medium text-rose-700 hover:underline dark:text-rose-400">Baixa</button>
+                                @endcan
                             </div>
                         </td>
                     </tr>

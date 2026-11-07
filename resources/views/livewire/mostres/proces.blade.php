@@ -74,10 +74,10 @@
             <section class="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-900">
                 <h2 class="mb-4 text-lg font-semibold">1. Descripció macroscòpica</h2>
                 <label for="macro" class="mb-1 block text-sm font-medium">Descripció de la mostra</label>
-                <textarea id="macro" rows="4" wire:model="formulari.descripcio_macroscopica" class="w-full rounded-lg border border-zinc-300 bg-transparent px-3 py-2 dark:border-zinc-600"></textarea>
+                <textarea id="macro" rows="4" wire:model="formulari.descripcio_macroscopica" class="w-full rounded-lg border border-zinc-300 bg-transparent px-3 py-2 dark:border-zinc-600" @disabled(! auth()->user()->can('process', $mostra))></textarea>
                 @error('formulari.descripcio_macroscopica') <p class="mt-1 text-sm text-rose-600">{{ $message }}</p> @enderror
                 <label class="mt-3 flex items-center gap-2 text-sm">
-                    <input type="checkbox" wire:model="formulari.descripcio_confirmada" class="rounded border-zinc-300">
+                    <input type="checkbox" wire:model="formulari.descripcio_confirmada" class="rounded border-zinc-300" @disabled(! auth()->user()->can('process', $mostra))>
                     Descripció macroscòpica confirmada
                 </label>
             </section>
@@ -89,14 +89,14 @@
                     <div class="grid gap-2 sm:grid-cols-2">
                         @foreach (\App\Livewire\Mostres\Proces::PROCEDIMENTS_CITOLOGIA as $procediment)
                             <label class="flex items-start gap-2 text-sm" wire:key="procediment-{{ md5($procediment) }}">
-                                <input type="checkbox" wire:model="formulari.procediments" value="{{ $procediment }}" class="mt-0.5 rounded border-zinc-300">
+                                <input type="checkbox" wire:model="formulari.procediments" value="{{ $procediment }}" class="mt-0.5 rounded border-zinc-300" @disabled(! auth()->user()->can('process', $mostra))>
                                 <span>{{ $procediment }}</span>
                             </label>
                         @endforeach
                     </div>
                     @error('formulari.procediments') <p class="mt-2 text-sm text-rose-600">{{ $message }}</p> @enderror
                     <label class="mt-4 flex items-center gap-2 text-sm">
-                        <input type="checkbox" wire:model="formulari.procediment_confirmat" class="rounded border-zinc-300"> Procediment confirmat
+                        <input type="checkbox" wire:model="formulari.procediment_confirmat" class="rounded border-zinc-300" @disabled(! auth()->user()->can('process', $mostra))> Procediment confirmat
                     </label>
                 </section>
             @else
@@ -105,16 +105,16 @@
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
                             <label for="blocs" class="mb-1 block text-sm font-medium">Nombre de blocs</label>
-                            <input id="blocs" type="number" min="1" max="100000" wire:model="formulari.numero_blocs" class="w-full rounded-lg border border-zinc-300 bg-transparent px-3 py-2 dark:border-zinc-600">
+                            <input id="blocs" type="number" min="1" max="100000" wire:model="formulari.numero_blocs" class="w-full rounded-lg border border-zinc-300 bg-transparent px-3 py-2 dark:border-zinc-600" @disabled(! auth()->user()->can('process', $mostra))>
                             @error('formulari.numero_blocs') <p class="mt-1 text-sm text-rose-600">{{ $message }}</p> @enderror
                         </div>
                         <div>
                             <label for="talls" class="mb-1 block text-sm font-medium">Talls inclosos per bloc</label>
-                            <textarea id="talls" rows="2" wire:model="formulari.talls_per_bloc" placeholder="Bloc 1: 4; Bloc 2: 1" class="w-full rounded-lg border border-zinc-300 bg-transparent px-3 py-2 dark:border-zinc-600"></textarea>
+                            <textarea id="talls" rows="2" wire:model="formulari.talls_per_bloc" placeholder="Bloc 1: 4; Bloc 2: 1" class="w-full rounded-lg border border-zinc-300 bg-transparent px-3 py-2 dark:border-zinc-600" @disabled(! auth()->user()->can('process', $mostra))></textarea>
                         </div>
                     </div>
                     <label class="mt-3 flex items-center gap-2 text-sm">
-                        <input type="checkbox" wire:model="formulari.tallat_macroscopic_confirmat" class="rounded border-zinc-300"> Tallat macroscòpic confirmat
+                        <input type="checkbox" wire:model="formulari.tallat_macroscopic_confirmat" class="rounded border-zinc-300" @disabled(! auth()->user()->can('process', $mostra))> Tallat macroscòpic confirmat
                     </label>
                 </section>
             @endif
@@ -125,7 +125,7 @@
                 <div class="grid gap-2 sm:grid-cols-2">
                     @foreach ($mostra->tipus_mostra === 'citologia' ? \App\Livewire\Mostres\Proces::TINCIONS_CITOLOGIA : \App\Livewire\Mostres\Proces::TINCIONS_BIOPSIA as $tincio)
                         <label class="flex items-start gap-2 text-sm" wire:key="tincio-{{ md5($tincio) }}">
-                            <input type="checkbox" wire:model="formulari.tincions" value="{{ $tincio }}" class="mt-0.5 rounded border-zinc-300">
+                            <input type="checkbox" wire:model="formulari.tincions" value="{{ $tincio }}" class="mt-0.5 rounded border-zinc-300" @disabled(! auth()->user()->can('process', $mostra))>
                             <span>{{ $tincio }}</span>
                         </label>
                     @endforeach
@@ -133,10 +133,10 @@
                 @error('formulari.tincions') <p class="mt-2 text-sm text-rose-600">{{ $message }}</p> @enderror
                 @if ($mostra->tipus_mostra === 'biopsia')
                     <label for="infotincions" class="mb-1 mt-4 block text-sm font-medium">Informació addicional sobre tincions</label>
-                    <textarea id="infotincions" rows="2" wire:model="formulari.informacio_tincions" placeholder="Ex.: Bloc 2: PAS" class="w-full rounded-lg border border-zinc-300 bg-transparent px-3 py-2 dark:border-zinc-600"></textarea>
+                    <textarea id="infotincions" rows="2" wire:model="formulari.informacio_tincions" placeholder="Ex.: Bloc 2: PAS" class="w-full rounded-lg border border-zinc-300 bg-transparent px-3 py-2 dark:border-zinc-600" @disabled(! auth()->user()->can('process', $mostra))></textarea>
                 @endif
                 <label class="mt-4 flex items-center gap-2 text-sm">
-                    <input type="checkbox" wire:model="formulari.tincions_confirmades" class="rounded border-zinc-300">
+                    <input type="checkbox" wire:model="formulari.tincions_confirmades" class="rounded border-zinc-300" @disabled(! auth()->user()->can('process', $mostra))>
                     {{ $mostra->tipus_mostra === 'citologia' ? 'Tincions confirmades' : 'Sol·licitud de tincions confirmada' }}
                 </label>
             </section>
@@ -153,13 +153,13 @@
                             'tincio_confirmada' => 'Tinció realitzada',
                         ] as $camp => $etiqueta)
                             <label class="flex items-start gap-2 text-sm" wire:key="etapa-{{ $camp }}">
-                                <input type="checkbox" wire:model="formulari.{{ $camp }}" class="mt-0.5 rounded border-zinc-300">
+                                <input type="checkbox" wire:model="formulari.{{ $camp }}" class="mt-0.5 rounded border-zinc-300" @disabled(! auth()->user()->can('process', $mostra))>
                                 {{ $etiqueta }}
                             </label>
                         @endforeach
                     </div>
                     <label for="laminetes" class="mb-1 mt-5 block text-sm font-medium">Microtomia: laminetes per bloc</label>
-                    <textarea id="laminetes" rows="2" wire:model="formulari.laminetes_per_bloc" placeholder="Bloc 1: 3; Bloc 2: 2" class="w-full rounded-lg border border-zinc-300 bg-transparent px-3 py-2 dark:border-zinc-600"></textarea>
+                    <textarea id="laminetes" rows="2" wire:model="formulari.laminetes_per_bloc" placeholder="Bloc 1: 3; Bloc 2: 2" class="w-full rounded-lg border border-zinc-300 bg-transparent px-3 py-2 dark:border-zinc-600" @disabled(! auth()->user()->can('process', $mostra))></textarea>
                     <p class="mt-1 text-xs text-zinc-500">Registre provisional en text, pendent de definir la identificació individual dels blocs.</p>
                 </section>
             @endif
@@ -167,14 +167,14 @@
             <section class="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-900">
                 <h2 class="mb-4 text-lg font-semibold">{{ $mostra->tipus_mostra === 'citologia' ? '4. Lliurament, diagnòstic i arxiu' : '5. Lliurament, diagnòstic i arxiu' }}</h2>
                 <div class="grid gap-3 sm:grid-cols-2">
-                    <label class="flex items-center gap-2 text-sm"><input type="checkbox" wire:model="formulari.muntatge_confirmat" class="rounded border-zinc-300"> Muntatge confirmat</label>
+                    <label class="flex items-center gap-2 text-sm"><input type="checkbox" wire:model="formulari.muntatge_confirmat" class="rounded border-zinc-300" @disabled(! auth()->user()->can('process', $mostra))> Muntatge confirmat</label>
                     @if ($mostra->tipus_mostra === 'citologia')
-                        <label class="flex items-center gap-2 text-sm"><input type="checkbox" wire:model="formulari.lliurament_confirmat" class="rounded border-zinc-300"> Lliurament confirmat</label>
+                        <label class="flex items-center gap-2 text-sm"><input type="checkbox" wire:model="formulari.lliurament_confirmat" class="rounded border-zinc-300" @disabled(! auth()->user()->can('process', $mostra))> Lliurament confirmat</label>
                     @else
-                        <label class="flex items-center gap-2 text-sm"><input type="checkbox" wire:model="formulari.lliurament_patoleg_confirmat" class="rounded border-zinc-300"> Lliurament al patòleg confirmat</label>
+                        <label class="flex items-center gap-2 text-sm"><input type="checkbox" wire:model="formulari.lliurament_patoleg_confirmat" class="rounded border-zinc-300" @disabled(! auth()->user()->can('process', $mostra))> Lliurament al patòleg confirmat</label>
                     @endif
-                    <label class="flex items-center gap-2 text-sm"><input type="checkbox" wire:model="formulari.diagnostic_confirmat" class="rounded border-zinc-300"> Diagnòstic confirmat</label>
-                    <label class="flex items-center gap-2 text-sm"><input type="checkbox" wire:model="formulari.arxiu_confirmat" class="rounded border-zinc-300"> Arxiu confirmat</label>
+                    <label class="flex items-center gap-2 text-sm"><input type="checkbox" wire:model="formulari.diagnostic_confirmat" @disabled(! auth()->user()->can('diagnose', $mostra)) class="rounded border-zinc-300"> Diagnòstic confirmat</label>
+                    <label class="flex items-center gap-2 text-sm"><input type="checkbox" wire:model="formulari.arxiu_confirmat" @disabled(! auth()->user()->can('archive', $mostra)) class="rounded border-zinc-300"> Arxiu confirmat</label>
                 </div>
                 @error('formulari.diagnostic_confirmat') <p class="mt-2 text-sm text-rose-600">{{ $message }}</p> @enderror
                 @error('formulari.arxiu_confirmat') <p class="mt-2 text-sm text-rose-600">{{ $message }}</p> @enderror
@@ -182,15 +182,17 @@
 
             <section class="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-900">
                 <h2 class="mb-3 text-lg font-semibold">Incidències i observacions</h2>
-                <textarea rows="4" wire:model="formulari.incidencies" aria-label="Incidències i observacions" class="w-full rounded-lg border border-zinc-300 bg-transparent px-3 py-2 dark:border-zinc-600"></textarea>
+                <textarea rows="4" wire:model="formulari.incidencies" aria-label="Incidències i observacions" class="w-full rounded-lg border border-zinc-300 bg-transparent px-3 py-2 dark:border-zinc-600" @disabled(! auth()->user()->can('process', $mostra))></textarea>
                 @error('formulari.incidencies') <p class="mt-1 text-sm text-rose-600">{{ $message }}</p> @enderror
             </section>
 
             <div class="flex items-center gap-3">
+                @canany(['process', 'diagnose'], $mostra)
                 <button type="submit" wire:loading.attr="disabled" wire:target="guardar" @disabled(! $mostra->recepcio_confirmada)
                     class="rounded-lg bg-zinc-900 px-5 py-2 text-sm font-semibold text-white hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-zinc-900">
                     Desar processament
                 </button>
+                @endcanany
                 <span wire:loading wire:target="guardar" class="text-sm text-zinc-500">Desant…</span>
             </div>
         </div>

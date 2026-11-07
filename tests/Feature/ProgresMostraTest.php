@@ -19,7 +19,12 @@ class ProgresMostraTest extends TestCase
     {
         $mostra = $this->crearMostra('CIT-001', 'citologia');
 
-        Livewire::actingAs(User::factory()->create())
+        Livewire::actingAs(
+            User::factory()->create([
+                'rol' => 'tecnic',
+                'actiu' => true,
+            ])
+        )
             ->test(Proces::class, ['mostra' => $mostra])
             ->assertViewHas('progres', fn (array $p): bool =>
                 $p['completades'] === 1 && $p['total'] === 8 && $p['percentatge'] === 13

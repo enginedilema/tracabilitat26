@@ -11,6 +11,22 @@ Route::middleware(['auth'])->group(function () {
     Route::view('/mostres', 'mostres.index')
         ->name('mostres.index');
 });
+Route::get('/administracio/usuaris', function () {
+    \Illuminate\Support\Facades\Gate::authorize(
+        'viewAny',
+        \App\Models\User::class
+    );
+
+    return view('administracio.usuaris');
+})->middleware('auth')->name('usuaris.index');
+Route::get('/administracio/usuaris', function () {
+    \Illuminate\Support\Facades\Gate::authorize(
+        'viewAny',
+        \App\Models\User::class
+    );
+
+    return view('administracio.usuaris');
+})->middleware('auth')->name('usuaris.index');
 
 Route::get('/mostres/{mostra}/proces', function (\App\Models\Mostra $mostra) {
     return view('mostres.proces', compact('mostra'));

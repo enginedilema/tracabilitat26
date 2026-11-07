@@ -8,6 +8,7 @@ use App\Models\MostraProcessament;
 use App\Support\ProgresMostra;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
@@ -39,7 +40,7 @@ class Proces extends Component
 
     public function mount(Mostra $mostra): void
     {
-        abort_unless(auth()->check(), 403);
+        Gate::authorize('view', $mostra);
         $this->mostraId = $mostra->id;
         $anterior = MostraProcessament::query()->where('mostra_id', $mostra->id)->first();
         $this->formulari = array_replace(
@@ -54,8 +55,9 @@ class Proces extends Component
 
     public function guardar(): void
     {
-        abort_unless(auth()->check(), 403);
         $mostra = Mostra::query()->findOrFail($this->mostraId);
+        Gate::authorize('view', $mostra);
+        abort_unless(Gate::any(['process', 'diagnose'], $mostra), 403);
 
         if (! $mostra->recepcio_confirmada) {
             throw ValidationException::withMessages([
@@ -66,6 +68,9 @@ class Proces extends Component
         $dades = $this->validate($this->regles($mostra))['formulari'];
         $dades['numero_blocs'] = isset($dades['numero_blocs']) && $dades['numero_blocs'] !== ''
             ? (int) $dades['numero_blocs'] : null;
+        // Comprovem els camps sensibles amb les dades REALS de la BD.
+        // Un usuari no pot elevar permisos canviant propietats Livewire.
+        $this->protegirCanvis($mostra, $dades);
         $esCitologia = $mostra->tipus_mostra === 'citologia';
         if ($esCitologia) {
             unset($dades['numero_blocs']);
@@ -133,6 +138,43 @@ class Proces extends Component
         });
 
         $this->missatge = 'Processament desat i historial actualitzat.';
+    }
+
+    private function protegirCanvis(Mostra $mostra, array $dades): void
+    {
+        $anterior = MostraProcessament::query()->where('mostra_id', $mostra->id)->first();
+        $original = array_replace(
+            $this->valorsInicials(),
+            $anterior ? $anterior->only(array_keys($this->valorsInicials())) : [],
+        );
+
+        foreach ($dades as $camp => $nouValor) {
+            $esCampDiagnostic = in_array($camp, ['diagnostic_confirmat', 'arxiu_confirmat'], true);
+            $permes = $esCampDiagnostic
+                ? Gate::allows('diagnose', $mostra)
+                : Gate::allows('process', $mostra);
+
+            if (! $permes && $this->valorComparable($nouValor) !== $this->valorComparable($original[$camp] ?? null)) {
+                abort(403, 'No tens permisos per modificar aquesta fase.');
+            }
+        }
+    }
+
+    private function valorComparable(mixed $valor): mixed
+    {
+        if ($valor === '' || $valor === null) {
+            return null;
+        }
+        if (is_array($valor) && $valor === []) {
+            return null;
+        }
+        if (is_bool($valor)) {
+            return $valor;
+        }
+        if (is_int($valor) || is_float($valor)) {
+            return (string) $valor;
+        }
+        return $valor;
     }
 
     private function regles(Mostra $mostra): array
@@ -220,6 +262,7 @@ class Proces extends Component
     public function render(): View
     {
         $mostra = Mostra::query()->findOrFail($this->mostraId);
+        Gate::authorize('view', $mostra);
         $procesDesat = MostraProcessament::query()
             ->where('mostra_id', $mostra->id)->first();
         $progres = ProgresMostra::calcular($mostra, $procesDesat);

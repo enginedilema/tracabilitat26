@@ -6,6 +6,7 @@ use App\Models\Mostra;
 use App\Models\MostraEsdeveniment;
 use App\Models\MostraProcessament;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -51,7 +52,7 @@ class Index extends Component
 
     public function crear(): void
     {
-        abort_unless(auth()->check(), 403);
+        Gate::authorize('create', Mostra::class);
         $this->reiniciarFormulari();
         $this->formulariObert = true;
         $this->consultantId = null;
@@ -59,16 +60,17 @@ class Index extends Component
 
     public function consultar(int $id): void
     {
-        abort_unless(auth()->check(), 403);
-        $this->consultantId = Mostra::query()->findOrFail($id)->id;
+        $m = Mostra::query()->findOrFail($id);
+        Gate::authorize('view', $m);
+        $this->consultantId = $m->id;
         $this->formulariObert = false;
         $this->missatge = '';
     }
 
     public function editar(int $id): void
     {
-        abort_unless(auth()->check(), 403);
         $mostra = Mostra::query()->findOrFail($id);
+        Gate::authorize('update', $mostra);
         $this->reiniciarFormulari();
 
         $this->editantId = $mostra->id;
@@ -92,7 +94,11 @@ class Index extends Component
 
     public function guardar(): void
     {
-        abort_unless(auth()->check(), 403);
+        if ($this->editantId === null) {
+            Gate::authorize('create', Mostra::class);
+        } else {
+            Gate::authorize('update', Mostra::query()->findOrFail($this->editantId));
+        }
 
         if ($this->edat === '') {
             $this->edat = null;
@@ -180,7 +186,7 @@ class Index extends Component
 
     public function eliminar(int $id): void
     {
-        abort_unless(auth()->check(), 403);
+        Gate::authorize('delete', Mostra::query()->findOrFail($id));
 
         DB::transaction(function () use ($id): void {
             $mostra = Mostra::query()->findOrFail($id);
@@ -223,7 +229,7 @@ class Index extends Component
 
     public function render(): View
     {
-        abort_unless(auth()->check(), 403);
+        Gate::authorize('viewAny', Mostra::class);
         $cerca = trim($this->cerca);
 
         return view('livewire.mostres.index', [
