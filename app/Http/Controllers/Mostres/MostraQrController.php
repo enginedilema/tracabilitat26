@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mostres;
 
 use App\Http\Controllers\Controller;
 use App\Models\Mostra;
+use App\Models\QrEtiqueta;
 use App\Services\MostraQrService;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\QrCode;
@@ -45,10 +46,30 @@ class MostraQrController extends Controller
 
     public function resoldre(string $token): RedirectResponse
     {
+        $etiqueta = QrEtiqueta::query()->where('token', strtolower($token))->first();
+
+        if ($etiqueta) {
+            if ($etiqueta->estat === 'anullat') {
+                abort(410, 'Aquest QR ha estat anul·lat.');
+            }
+
+            if ($etiqueta->estat === 'disponible' && $etiqueta->mostra_id === null) {
+                Gate::authorize('create', Mostra::class);
+
+                // Obrim el formulari de recepció amb el token, sense assignar-lo encara.
+                return redirect()->route('mostres.index', ['qr' => $etiqueta->token]);
+            }
+
+            abort_unless($etiqueta->estat === 'assignat' && $etiqueta->mostra_id !== null, 404);
+            $mostra = Mostra::query()->findOrFail($etiqueta->mostra_id);
+            Gate::authorize('view', $mostra);
+
+            return redirect()->route('mostres.proces', $mostra);
+        }
+
+        // Compatibilitat amb QR de la v0.6 assignats abans de la preimpressió.
         $mostra = Mostra::query()->where('qr_token', $token)->firstOrFail();
         Gate::authorize('view', $mostra);
-
-        // Escanejar no completa fases ni modifica el processament.
         return redirect()->route('mostres.proces', $mostra);
     }
 

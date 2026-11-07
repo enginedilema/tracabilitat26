@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\EtiquetaA4Controller;
+use App\Livewire\Etiquetes\GeneradorEtiquetes;
 
 Route::view('/', 'welcome')->name('home');
 
@@ -34,6 +36,14 @@ Route::get('/mostres/{mostra}/proces', function (\App\Models\Mostra $mostra) {
     ->middleware('auth')
     ->name('mostres.proces');
 
+    
+    Route::middleware('auth')->group(function () {
+        Route::get('/etiquetes', GeneradorEtiquetes::class)
+            ->name('etiquetes.index');
+
+    });
 
 require __DIR__.'/settings.php';
+//Versió antiga dels qr
 require __DIR__.'/qr.php';
+require __DIR__.'/qr_preimpressio.php';

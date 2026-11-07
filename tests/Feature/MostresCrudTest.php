@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Livewire\Mostres\Index;
 use App\Models\Mostra;
+use App\Models\QrEtiqueta;
+use App\Services\QrPreimpressioService;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -20,9 +22,15 @@ class MostresCrudTest extends TestCase
 
     public function test_un_usuari_pot_crear_una_mostra(): void
     {
-        Livewire::actingAs(User::factory()->create(['rol' => 'admin', 'actiu' => true]))
+        $admin = User::factory()->create(['rol' => 'admin', 'actiu' => true]);
+        $this->actingAs($admin);
+        $lot = app(QrPreimpressioService::class)->crearLot(1);
+        $token = $lot->etiquetes()->firstOrFail()->token;
+
+        Livewire::actingAs($admin)
             ->test(Index::class)
             ->call('crear')
+            ->set('qrCodi', $token)
             ->set('identificacio', 'LAB-TEST-001')
             ->set('tipus_mostra', 'citologia')
             ->set('data_entrada', '2026-11-06')

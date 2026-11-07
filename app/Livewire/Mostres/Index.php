@@ -5,6 +5,8 @@ namespace App\Livewire\Mostres;
 use App\Models\Mostra;
 use App\Models\MostraEsdeveniment;
 use App\Models\MostraProcessament;
+use App\Services\QrPreimpressioService;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Contracts\View\View;
@@ -26,6 +28,7 @@ class Index extends Component
     public ?int $consultantId = null;
     public string $missatge = '';
 
+    public string $qrCodi = '';
     public string $identificacio = '';
     public string $tipus_mostra = 'citologia';
     public string $genere = '';
@@ -39,6 +42,16 @@ class Index extends Component
     public string $tipus_secundari = '';
     public string $organ_localitzacio = '';
     public bool $recepcio_confirmada = false;
+
+    public function mount(): void
+    {
+        $token = request()->query('qr');
+        if (is_string($token) && Str::isUuid($token) && Gate::allows('create', Mostra::class)) {
+            $this->reiniciarFormulari();
+            $this->qrCodi = strtolower($token);
+            $this->formulariObert = true;
+        }
+    }
 
     public function updatedCerca(): void
     {
@@ -92,7 +105,7 @@ class Index extends Component
         $this->formulariObert = true;
     }
 
-    public function guardar(): void
+    public function guardar(QrPreimpressioService $serveiQr): void
     {
         if ($this->editantId === null) {
             Gate::authorize('create', Mostra::class);
@@ -105,6 +118,7 @@ class Index extends Component
         }
 
         $dades = $this->validate([
+            'qrCodi' => [$this->editantId === null ? 'required' : 'nullable', 'string', 'max:512'],
             'identificacio' => ['required', 'string', 'max:255', Rule::unique('mostres', 'identificacio')->ignore($this->editantId)],
             'tipus_mostra' => ['required', Rule::in(['citologia', 'biopsia'])],
             'genere' => ['nullable', 'string', 'max:20'],
@@ -120,6 +134,9 @@ class Index extends Component
             'recepcio_confirmada' => ['boolean'],
         ]);
 
+        // El codi es valida per separat, no és una columna de la taula mostres.
+        unset($dades['qrCodi']);
+
         foreach (['genere', 'edat', 'motiu_sollicitud', 'procedencia', 'sollicitant', 'tipus_principal', 'tipus_secundari', 'organ_localitzacio'] as $camp) {
             if ($dades[$camp] === '') {
                 $dades[$camp] = null;
@@ -133,7 +150,7 @@ class Index extends Component
             $dades['tipus_secundari'] = null;
         }
 
-        $missatge = DB::transaction(function () use ($dades): string {
+        $missatge = DB::transaction(function () use ($dades, $serveiQr): string {
             if ($this->editantId !== null) {
                 $mostra = Mostra::query()->findOrFail($this->editantId);
                 $teProces = MostraProcessament::query()->where('mostra_id', $mostra->id)->exists();
@@ -169,8 +186,16 @@ class Index extends Component
 
             $mostra = Mostra::query()->create($dades);
             $mostra->forceFill(['estat' => $dades['recepcio_confirmada'] ? 'rebuda' : 'pendent'])->save();
+
+            // Si no es pot vincular, la transacció reverteix també l'alta de la mostra.
+            $etiqueta = $serveiQr->assignar($this->qrCodi, $mostra);
+
             MostraEsdeveniment::registrar($mostra, 'mostra_registrada', [
                 'estat_nou' => $mostra->estat,
+            ]);
+            MostraEsdeveniment::registrar($mostra, 'qr_assignat', [
+                'etiqueta_id' => $etiqueta->id,
+                'lot_id' => $etiqueta->lot_id,
             ]);
             return 'Mostra registrada correctament.';
         });
@@ -216,7 +241,7 @@ class Index extends Component
     private function reiniciarFormulari(): void
     {
         $this->reset([
-            'identificacio', 'tipus_mostra', 'genere', 'edat', 'motiu_sollicitud',
+            'qrCodi', 'identificacio', 'tipus_mostra', 'genere', 'edat', 'motiu_sollicitud',
             'procedencia', 'sollicitant', 'data_entrada', 'hora_entrada',
             'tipus_principal', 'tipus_secundari', 'organ_localitzacio',
             'recepcio_confirmada', 'editantId', 'formulariObert', 'missatge',

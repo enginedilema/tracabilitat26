@@ -80,7 +80,6 @@
                         </td>
                         <td class="whitespace-nowrap px-4 py-3 text-right">
                             <div class="flex justify-end gap-3">
-                                <a href="{{ route('mostres.qr.etiqueta', $mostra) }}" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-violet-700 hover:underline dark:text-violet-400">Etiqueta QR</a>
                                 <a href="{{ route('mostres.proces', $mostra) }}" wire:navigate class="text-sm font-semibold text-emerald-700 hover:underline dark:text-emerald-400">Circuit</a>
                                 <button type="button" wire:click="consultar({{ $mostra->id }})" class="text-sm font-medium text-sky-700 hover:underline dark:text-sky-400">Veure</button>
                                 @can('update', $mostra)
@@ -123,7 +122,6 @@
                 @endif
                 <div><dt class="font-medium">Recepció</dt><dd>{{ $consulta->recepcio_confirmada ? 'Confirmada' : 'Pendent' }}</dd></div>
                 <div><dt class="font-medium">Circuit</dt><dd><a href="{{ route('mostres.proces', $consulta) }}" wire:navigate class="font-semibold text-emerald-700 hover:underline">Obrir processament i historial</a></dd></div>
-                <div><dt class="font-medium">Etiqueta QR</dt><dd><a href="{{ route('mostres.qr.etiqueta', $consulta) }}" target="_blank" rel="noopener noreferrer" class="font-semibold text-violet-700 hover:underline">Imprimir etiqueta de la mostra</a></dd></div>
             </dl>
         </section>
     @endif
@@ -136,6 +134,15 @@
             </div>
 
             <form wire:submit="guardar" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                @if ($editantId === null)
+                <div class="md:col-span-2 rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-950/20">
+                    <label for="qrCodi" class="mb-1 block text-sm font-semibold">QR preimprès de la mostra *</label>
+                    <p class="mb-2 text-xs text-zinc-600 dark:text-zinc-400">Escaneja el QR disponible amb un lector USB o enganxa el seu UUID. El QR no es vincularà fins que desis la mostra.</p>
+                    <input id="qrCodi" type="text" wire:model="qrCodi" required autocomplete="off" spellcheck="false"
+                        placeholder="Escaneja el QR o introdueix el token" class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-800" />
+                    @error('qrCodi') <p class="mt-1 text-sm text-rose-700">{{ $message }}</p> @enderror
+                </div>
+                @endif
                 <div>
                     <label for="identificacio" class="mb-1 block text-sm font-medium">Identificació *</label>
                     <input id="identificacio" type="text" wire:model="identificacio" maxlength="255" required class="w-full rounded-lg border border-zinc-300 bg-transparent px-3 py-2 dark:border-zinc-600" />

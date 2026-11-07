@@ -10,6 +10,7 @@
 .env
 .env.backup
 .env.production
+/.env.*
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
@@ -38,3 +39,7 @@ yarn-error.log
 /boost.json
 /opencode.json
 /opencode.jsonc
+/database/*.sqlite
+/database/*.sqlite-*
+/database/*.db
+/database/*.db-*

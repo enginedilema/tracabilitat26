@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Mostra;
+use App\Models\QrEtiqueta;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -14,6 +15,15 @@ class MostraQrService
      */
     public function token(Mostra $mostra): string
     {
+        // A les mostres noves, el QR assignat del full preimprès és el QR principal.
+        $etiqueta = QrEtiqueta::query()
+            ->where('mostra_id', $mostra->getKey())
+            ->where('estat', 'assignat')
+            ->first();
+        if ($etiqueta) {
+            return $etiqueta->token;
+        }
+
         if ($mostra->qr_token) {
             return (string) $mostra->qr_token;
         }
