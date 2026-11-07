@@ -19,7 +19,7 @@
         <h2 class="mb-3 text-lg font-semibold">Lots generats</h2>
         <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
-                <thead><tr class="border-b text-left"><th class="p-2">Lot</th><th class="p-2">Data</th><th class="p-2">Total</th><th class="p-2">Disponibles</th><th class="p-2">Assignades</th><th class="p-2">Impressió</th></tr></thead>
+                <thead><tr class="border-b text-left"><th class="p-2">Lot</th><th class="p-2">Data</th><th class="p-2">Total</th><th class="p-2">Disponibles</th><th class="p-2">Assignades</th><th class="p-2">Anul·lades</th><th class="p-2">Gestió</th></tr></thead>
                 <tbody>
                     @forelse($lots as $lot)
                     <tr class="border-b border-zinc-100 dark:border-zinc-800">
@@ -28,14 +28,21 @@
                         <td class="p-2">{{ $lot->quantitat }}</td>
                         <td class="p-2">{{ $lot->disponibles }}</td>
                         <td class="p-2">{{ $lot->assignades }}</td>
-                        <td class="p-2"><a class="font-semibold text-emerald-700 hover:underline" href="{{ route('etiquetes.a4', $lot) }}" target="_blank" rel="noopener">Obrir full</a></td>
+                        <td class="p-2">{{ $lot->anullades }}</td>
+                        <td class="p-2">
+                            <a class="font-semibold text-emerald-700 hover:underline" href="{{ route('etiquetes.lot', $lot) }}">Gestionar</a>
+                            @if ($lot->disponibles > 0)
+                                <span class="px-1 text-zinc-400">·</span>
+                                <a class="font-semibold text-emerald-700 hover:underline" href="{{ route('etiquetes.a4', $lot) }}" target="_blank" rel="noopener">Imprimir disponibles</a>
+                            @endif
+                        </td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" class="p-4 text-center text-zinc-500">Encara no hi ha lots.</td></tr>
+                    <tr><td colspan="7" class="p-4 text-center text-zinc-500">Encara no hi ha lots.</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        <p class="mt-3 text-xs text-zinc-500">Si reimprimeixes un lot, retira les etiquetes antigues per evitar còpies físiques del mateix QR.</p>
+        <p class="mt-3 text-xs text-zinc-500">Reimprimir un lot pot crear duplicats físics. Retira o destrueix els fulls anteriors abans de tornar a imprimir.</p>
     </section>
 </div>

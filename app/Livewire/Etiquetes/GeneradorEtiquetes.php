@@ -31,6 +31,7 @@ class GeneradorEtiquetes extends Component
             'lots' => QrLot::query()->withCount([
                 'etiquetes as disponibles' => fn ($q) => $q->where('estat', 'disponible'),
                 'etiquetes as assignades' => fn ($q) => $q->where('estat', 'assignat'),
+                'etiquetes as anullades' => fn ($q) => $q->where('estat', 'anullat'),
             ])->latest()->limit(20)->get(),
         ]);
     }

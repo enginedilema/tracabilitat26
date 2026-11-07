@@ -24,7 +24,10 @@
     </style>
 </head>
 <body>
-    <div class="toolbar"><button onclick="window.print()">Imprimir A4</button><span>Lot #{{ $lot->id }} · {{ $etiquetes->count() }} codis sense mostra</span></div>
+    <div class="toolbar"><button onclick="window.print()">Imprimir A4</button><span>Lot #{{ $lot->id }} · {{ $etiquetes->count() }} codis disponibles per assignar</span></div>
+    @if ($etiquetes->isEmpty())
+        <p class="toolbar" role="status">No hi ha etiquetes disponibles en aquest lot. No es pot imprimir cap QR.</p>
+    @endif
     @foreach($etiquetes->chunk(10) as $pagina)
         <div class="sheet">
             @foreach($pagina as $etiqueta)

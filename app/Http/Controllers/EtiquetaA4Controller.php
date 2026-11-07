@@ -22,7 +22,10 @@ class EtiquetaA4Controller extends Controller
         $lot = QrLot::query()->findOrFail((int) $lot);
 
         $writer = new SvgWriter();
-        $etiquetes = $lot->etiquetes()->orderBy('id')->get()->map(
+        $etiquetes = $lot->etiquetes()
+            ->where('estat', 'disponible')
+            ->whereNull('mostra_id')
+            ->orderBy('id')->get()->map(
             function ($etiqueta) use ($writer): array {
                 // Només el token UUID, sense dades clíniques ni URL local.
                 $qr = new QrCode(

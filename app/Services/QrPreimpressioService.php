@@ -5,7 +5,9 @@ namespace App\Services;
 use App\Models\Mostra;
 use App\Models\QrEtiqueta;
 use App\Models\QrLot;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -82,4 +84,78 @@ class QrPreimpressioService
 
         return $etiqueta->fresh();
     }
+
+    /** Anul·la una etiqueta disponible. No permet anul·lar codis ja assignats. */
+    public function anullarEtiqueta(int $lotId, int $etiquetaId, string $motiu): QrEtiqueta
+    {
+        Gate::authorize('viewAny', User::class);
+        $motiu = $this->validarMotiu($motiu);
+        QrLot::query()->findOrFail($lotId);
+
+        return DB::transaction(function () use ($lotId, $etiquetaId, $motiu): QrEtiqueta {
+            $etiqueta = QrEtiqueta::query()
+                ->where('lot_id', $lotId)->findOrFail($etiquetaId);
+
+            if ($etiqueta->estat !== 'disponible' || $etiqueta->mostra_id !== null) {
+                throw ValidationException::withMessages([
+                    'motiuAnullacio' => 'Només es poden anul·lar codis QR disponibles i sense mostra.',
+                ]);
+            }
+
+            // Actualització atòmica: no anul·la un QR que s'assigni simultàniament.
+            $canvis = QrEtiqueta::query()
+                ->whereKey($etiquetaId)
+                ->where('lot_id', $lotId)
+                ->where('estat', 'disponible')
+                ->whereNull('mostra_id')
+                ->update([
+                    'estat' => 'anullat',
+                    'anullat_per' => auth()->id(),
+                    'anullat_at' => now(),
+                    'motiu_anullacio' => $motiu,
+                    'updated_at' => now(),
+                ]);
+
+            if ($canvis !== 1) {
+                throw ValidationException::withMessages([
+                    'motiuAnullacio' => 'El QR ja no està disponible. Actualitza el lot.',
+                ]);
+            }
+
+            return $etiqueta->fresh();
+        });
+    }
+
+    /** Anul·la només els QR disponibles d'un lot; conserva els que estan assignats. */
+    public function anullarDisponiblesLot(int $lotId, string $motiu): int
+    {
+        Gate::authorize('viewAny', User::class);
+        $motiu = $this->validarMotiu($motiu);
+        QrLot::query()->findOrFail($lotId);
+
+        return DB::transaction(fn (): int => QrEtiqueta::query()
+            ->where('lot_id', $lotId)
+            ->where('estat', 'disponible')
+            ->whereNull('mostra_id')
+            ->update([
+                'estat' => 'anullat',
+                'anullat_per' => auth()->id(),
+                'anullat_at' => now(),
+                'motiu_anullacio' => $motiu,
+                'updated_at' => now(),
+            ]));
+    }
+
+    private function validarMotiu(string $motiu): string
+    {
+        $motiu = trim($motiu);
+        if (Str::length($motiu) < 8 || Str::length($motiu) > 255) {
+            throw ValidationException::withMessages([
+                'motiuAnullacio' => 'Escriu un motiu entre 8 i 255 caràcters.',
+            ]);
+        }
+
+        return $motiu;
+    }
+
 }

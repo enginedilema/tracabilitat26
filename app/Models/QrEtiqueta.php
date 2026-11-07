@@ -9,7 +9,7 @@ class QrEtiqueta extends Model
 {
     protected $table = 'qr_etiquetes';
 
-    protected $fillable = ['lot_id', 'token', 'estat', 'mostra_id', 'assignat_per', 'assignat_at', 'anullat_at'];
+    protected $fillable = ['lot_id', 'token', 'estat', 'mostra_id', 'assignat_per', 'assignat_at', 'anullat_at', 'anullat_per', 'motiu_anullacio'];
 
     protected function casts(): array
     {
@@ -19,6 +19,11 @@ class QrEtiqueta extends Model
     public function lot(): BelongsTo
     {
         return $this->belongsTo(QrLot::class, 'lot_id');
+    }
+
+    public function anullatPer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'anullat_per');
     }
 
     public function mostra(): BelongsTo
