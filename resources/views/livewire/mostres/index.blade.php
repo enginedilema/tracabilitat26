@@ -80,6 +80,7 @@
                         </td>
                         <td class="whitespace-nowrap px-4 py-3 text-right">
                             <div class="flex justify-end gap-3">
+                                <a href="{{ route('mostres.qr.etiqueta', $mostra) }}" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-violet-700 hover:underline dark:text-violet-400">Etiqueta QR</a>
                                 <a href="{{ route('mostres.proces', $mostra) }}" wire:navigate class="text-sm font-semibold text-emerald-700 hover:underline dark:text-emerald-400">Circuit</a>
                                 <button type="button" wire:click="consultar({{ $mostra->id }})" class="text-sm font-medium text-sky-700 hover:underline dark:text-sky-400">Veure</button>
                                 @can('update', $mostra)
@@ -122,6 +123,7 @@
                 @endif
                 <div><dt class="font-medium">Recepció</dt><dd>{{ $consulta->recepcio_confirmada ? 'Confirmada' : 'Pendent' }}</dd></div>
                 <div><dt class="font-medium">Circuit</dt><dd><a href="{{ route('mostres.proces', $consulta) }}" wire:navigate class="font-semibold text-emerald-700 hover:underline">Obrir processament i historial</a></dd></div>
+                <div><dt class="font-medium">Etiqueta QR</dt><dd><a href="{{ route('mostres.qr.etiqueta', $consulta) }}" target="_blank" rel="noopener noreferrer" class="font-semibold text-violet-700 hover:underline">Imprimir etiqueta de la mostra</a></dd></div>
             </dl>
         </section>
     @endif

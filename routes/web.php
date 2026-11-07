@@ -36,3 +36,4 @@ Route::get('/mostres/{mostra}/proces', function (\App\Models\Mostra $mostra) {
 
 
 require __DIR__.'/settings.php';
+require __DIR__.'/qr.php';

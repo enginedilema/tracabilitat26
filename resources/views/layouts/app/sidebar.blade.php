@@ -17,8 +17,11 @@
                     </flux:sidebar.item>
 
                     @can('viewAny', \App\Models\Mostra::class)
-                        <flux:sidebar.item icon="beaker" :href="route('mostres.index')" :current="request()->routeIs('mostres.*')" wire:navigate>
+                        <flux:sidebar.item icon="beaker" :href="route('mostres.index')" :current="request()->routeIs('mostres.index', 'mostres.proces')" wire:navigate>
                             Mostres
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="qr-code" :href="route('mostres.qr.lector')" :current="request()->routeIs('mostres.qr.lector')" wire:navigate>
+                            Lector QR
                         </flux:sidebar.item>
                     @endcan
                 </flux:sidebar.group>
