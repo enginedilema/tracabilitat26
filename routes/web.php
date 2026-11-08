@@ -40,7 +40,13 @@ Route::get('/mostres/{mostra}/proces', function (\App\Models\Mostra $mostra) {
     Route::middleware('auth')->group(function () {
         Route::get('/etiquetes', GeneradorEtiquetes::class)
             ->name('etiquetes.index');
+<<<<<<< HEAD
 
+=======
+    
+        Route::get('/etiquetes/a4', [EtiquetaA4Controller::class, 'index'])
+            ->name('etiquetes.a4');
+>>>>>>> fa41286a28c9f088fb5b9a68acbd117ed20126da
     });
 
 require __DIR__.'/settings.php';
