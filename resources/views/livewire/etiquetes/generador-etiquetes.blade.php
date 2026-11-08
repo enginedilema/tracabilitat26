@@ -62,7 +62,7 @@
                                     @if ($lot->disponibles > 0)
                                         <span class="px-1 text-zinc-400">·</span>
                                         <a class="font-semibold text-emerald-700 hover:underline"
-                                           href="{{ route('etiquetes.a4.lot', ['lot' => $lot->id]) }}"
+                                           href="{{ route('etiquetes.a4', ['lot' => $lot->id]) }}"
                                            target="_blank" rel="noopener">Imprimir disponibles</a>
                                     @endif
                                 </td>

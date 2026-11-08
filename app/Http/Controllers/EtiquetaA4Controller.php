@@ -58,7 +58,45 @@ class EtiquetaA4Controller extends Controller
         abort_if($etiquetes->isEmpty(), 404, 'No s’han trobat mostres per imprimir.');
 
         return response()->view('etiquetes.a4', compact('etiquetes'))
->>>>>>> fa41286a28c9f088fb5b9a68acbd117ed20126da
+            ->header('Cache-Control', 'private, no-store, max-age=0')
+            ->header('Referrer-Policy', 'no-referrer')
+            ->header('X-Robots-Tag', 'noindex, nofollow');
+    }
+
+    /**
+     * Imprimeix els QR disponibles d'un lot previ a l'assignació de mostres.
+     * Ruta: /etiquetes/lots/{lot}/a4
+     */
+    public function lot(string $lot): Response
+    {
+        Gate::authorize('viewAny', User::class);
+
+        abort_unless(ctype_digit($lot) && (int) $lot > 0, 404);
+        $lot = QrLot::query()->findOrFail((int) $lot);
+
+        $writer = new SvgWriter();
+
+        $etiquetes = $lot->etiquetes()
+            ->where('estat', 'disponible')
+            ->whereNull('mostra_id')
+            ->orderBy('id')
+            ->get()
+            ->map(function ($etiqueta) use ($writer): array {
+                $qr = new QrCode(
+                    data: $etiqueta->token,
+                    errorCorrectionLevel: ErrorCorrectionLevel::Medium,
+                    size: 300,
+                    margin: 10,
+                );
+
+                return [
+                    'token' => $etiqueta->token,
+                    'curt' => strtoupper(substr(str_replace('-', '', $etiqueta->token), -8)),
+                    'svg' => preg_replace('/^\s*<\?xml[^>]*\?>\s*/i', '', $writer->write($qr)->getString()),
+                ];
+            });
+
+        return response()->view('etiquetes.a4-lot', compact('etiquetes', 'lot'))
             ->header('Cache-Control', 'private, no-store, max-age=0')
             ->header('Referrer-Policy', 'no-referrer')
             ->header('X-Robots-Tag', 'noindex, nofollow');

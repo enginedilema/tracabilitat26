@@ -20,7 +20,7 @@
         .meta { font-size: 9pt; line-height: 1.2; }
         .small { font-size: 7pt; color: #444; }
         .qr { width: 29mm; height: 29mm; flex: 0 0 29mm; display: flex; align-items: center; justify-content: center; }
-        .qr img { width: 29mm; height: 29mm; display: block; }
+        .qr svg { width: 29mm; height: 29mm; display: block; }
         @media print {
             body { background: #fff; }
             .toolbar, .warning { display: none; }
@@ -35,7 +35,8 @@
         <a href="{{ route('etiquetes.index') }}">Tornar al generador</a>
     </div>
 
-    <p class="warning">Lot #{{ $lot->id }}. Cada QR és un identificador únic, encara sense mostra assignada. No reimprimeixis el mateix lot sense retirar els fulls anteriors.</p>
+    <p class="warning">Lot #{{ $lot->id }} · {{ $etiquetes->count() }} codis disponibles per assignar.</p>
+    <p class="warning">Cada QR és un identificador únic, encara sense mostra assignada. No reimprimeixis el mateix lot sense retirar els fulls anteriors.</p>
 
     @forelse ($etiquetes->chunk(10) as $bloc)
         <main class="page" aria-label="Full d'etiquetes QR del lot {{ $lot->id }}">
@@ -48,13 +49,14 @@
                         <div class="small">QR pendent d'assignar a una mostra</div>
                     </div>
                     <div class="qr">
-                        <img src="data:image/svg+xml;base64,{{ base64_encode($etiqueta['svg']) }}" alt="Codi QR {{ $etiqueta['curt'] }}">
+                        {{-- SVG generat al servidor a partir d'un token QR intern; no incorpora dades de mostra. --}}
+                        {!! $etiqueta['svg'] !!}
                     </div>
                 </article>
             @endforeach
         </main>
     @empty
-        <p class="warning">Aquest lot no té etiquetes disponibles per imprimir.</p>
+        <p class="warning">No hi ha etiquetes disponibles per imprimir en aquest lot.</p>
     @endforelse
 </body>
 </html>
