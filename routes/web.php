@@ -1,55 +1,58 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\EtiquetaA4Controller;
 use App\Livewire\Etiquetes\GeneradorEtiquetes;
+use App\Models\Mostra;
+use App\Models\User;
 
+// Pàgina inicial
 Route::view('/', 'welcome')->name('home');
 
+// Rutes protegides amb autenticació
 Route::middleware(['auth'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
-});
-Route::middleware(['auth'])->group(function () {
+
+    // Dashboard
+    Route::view('/dashboard', 'dashboard')
+        ->name('dashboard');
+
+    // Mostres
     Route::view('/mostres', 'mostres.index')
         ->name('mostres.index');
-});
-Route::get('/administracio/usuaris', function () {
-    \Illuminate\Support\Facades\Gate::authorize(
-        'viewAny',
-        \App\Models\User::class
-    );
 
-    return view('administracio.usuaris');
-})->middleware('auth')->name('usuaris.index');
-Route::get('/administracio/usuaris', function () {
-    \Illuminate\Support\Facades\Gate::authorize(
-        'viewAny',
-        \App\Models\User::class
-    );
+    // Procés d'una mostra
+    Route::get('/mostres/{mostra}/proces', function (Mostra $mostra) {
+        return view('mostres.proces', compact('mostra'));
+    })->name('mostres.proces');
 
-    return view('administracio.usuaris');
-})->middleware('auth')->name('usuaris.index');
+    // Administració d'usuaris
+    Route::get('/administracio/usuaris', function () {
+        Gate::authorize('viewAny', User::class);
 
-Route::get('/mostres/{mostra}/proces', function (\App\Models\Mostra $mostra) {
-    return view('mostres.proces', compact('mostra'));
-})
-    ->middleware('auth')
-    ->name('mostres.proces');
+        return view('administracio.usuaris');
+    })->name('usuaris.index');
 
-    
-    Route::middleware('auth')->group(function () {
-        Route::get('/etiquetes', GeneradorEtiquetes::class)
-            ->name('etiquetes.index');
-<<<<<<< HEAD
+    // Generador d'etiquetes
+    Route::get('/etiquetes', GeneradorEtiquetes::class)
+        ->name('etiquetes.index');
 
-=======
-    
+    // Etiquetes A4
+    Route::get('/etiquetes/a4', [EtiquetaA4Controller::class, 'index'])
+        ->name('etiquetes.a4');
         Route::get('/etiquetes/a4', [EtiquetaA4Controller::class, 'index'])
-            ->name('etiquetes.a4');
->>>>>>> fa41286a28c9f088fb5b9a68acbd117ed20126da
-    });
+    ->name('etiquetes.a4');
 
+Route::get('/etiquetes/a4/lot/{lot}', [EtiquetaA4Controller::class, 'lot'])
+    ->whereNumber('lot')
+    ->name('etiquetes.a4.lot');
+
+
+});
+
+// Rutes de configuració
 require __DIR__.'/settings.php';
-//Versió antiga dels qr
+
+// Rutes antigues de codis QR
 require __DIR__.'/qr.php';
 require __DIR__.'/qr_preimpressio.php';

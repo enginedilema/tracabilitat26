@@ -1,38 +1,96 @@
-name: tests
+name: Tests Traçabilitat
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  ci:
-    runs-on: ubuntu-latest
+  tests:
+    name: Comprovar projecte Laravel
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    env:
+      CI: 'true'
+      APP_ENV: testing
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ':memory:'
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
 
     steps:
-      - name: Checkout code
+      - name: Descarregar codi
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - name: Setup PHP
+      - name: Detectar conflictes de Git pendents
+        shell: bash
+        run: |
+          if git grep -n -E '^(<<<<<<< |=======$|>>>>>>> )' -- app routes resources tests; then
+            echo '::error::Hi ha marcadors de conflicte de Git. Resol-los abans de continuar.'
+            exit 1
+          fi
+
+      - name: Preparar PHP 8.4
         uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
+          extensions: mbstring, pdo_sqlite, sqlite3, xml, curl, zip, gd, intl
           tools: composer:v2
           coverage: none
 
-      - name: Setup Node
+      - name: Preparar Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '22'
+          package-manager-cache: false
 
-      - name: Setup Application
+      # Conserva la preparació que ja feia el tests.yml original.
+      - name: Preparar aplicacio
         run: composer setup
 
-      - name: Run CI Checks
+      - name: Comprovar sintaxi PHP
+        shell: bash
+        run: |
+          find app routes tests -type f -name '*.php' -print0 \
+            | xargs -0 -r -n 1 php -l
+
+      - name: Comprovar rutes Laravel
+        run: php artisan route:list > /dev/null
+
+      - name: Compilar i validar vistes Blade
+        run: php artisan view:cache
+
+      - name: Executar tests Unit i Feature
+        run: php artisan test --no-ansi
+
+      - name: Instal·lar dependencies del frontend
+        if: hashFiles('package.json') != ''
+        shell: bash
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Executar tests del frontend si existeixen
+        if: hashFiles('package.json') != ''
+        run: npm test --if-present
+
+      - name: Comprovar compilacio del frontend
+        if: hashFiles('package.json') != ''
+        run: npm run build --if-present
+
+      # Conserva totes les comprovacions especificades pel projecte.
+      - name: Comprovacions propies del projecte
         run: composer ci:check
+
