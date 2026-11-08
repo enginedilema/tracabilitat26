@@ -92,7 +92,7 @@ class EtiquetaA4Controller extends Controller
                 return [
                     'token' => $etiqueta->token,
                     'curt' => strtoupper(substr(str_replace('-', '', $etiqueta->token), -8)),
-                    'svg' => preg_replace('/^<\?xml[^>]*\?>\s*/i', '', ltrim($writer->write($qr)->getString())),
+                    'svg' => preg_replace('/^\s*<\?xml[^>]*\?>\s*/i', '', $writer->write($qr)->getString()),
                 ];
             });
 

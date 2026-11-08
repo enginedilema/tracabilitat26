@@ -35,7 +35,8 @@
         <a href="{{ route('etiquetes.index') }}">Tornar al generador</a>
     </div>
 
-    <p class="warning">Lot #{{ $lot->id }} · {{ $etiquetes->count() }} codis disponibles per assignar. Cada QR és un identificador únic, encara sense mostra assignada. No reimprimeixis el mateix lot sense retirar els fulls anteriors.</p>
+    <p class="warning">Lot #{{ $lot->id }} · {{ $etiquetes->count() }} codis disponibles per assignar.</p>
+    <p class="warning">Cada QR és un identificador únic, encara sense mostra assignada. No reimprimeixis el mateix lot sense retirar els fulls anteriors.</p>
 
     @forelse ($etiquetes->chunk(10) as $bloc)
         <main class="page" aria-label="Full d'etiquetes QR del lot {{ $lot->id }}">
@@ -48,14 +49,14 @@
                         <div class="small">QR pendent d'assignar a una mostra</div>
                     </div>
                     <div class="qr">
-                        {{-- SVG creat pel servei de codis QR a partir d'un token controlat, no d'HTML d'usuari. --}}
+                        {{-- SVG creat al servidor amb Endroid a partir d'un UUID intern. --}}
                         {!! $etiqueta['svg'] !!}
                     </div>
                 </article>
             @endforeach
         </main>
     @empty
-        <p class="warning">No hi ha etiquetes disponibles</p>
+        <p class="warning">No hi ha etiquetes disponibles per imprimir en aquest lot.</p>
     @endforelse
 </body>
 </html>
