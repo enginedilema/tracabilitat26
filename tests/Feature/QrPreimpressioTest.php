@@ -5,13 +5,13 @@ namespace Tests\Feature;
 use App\Livewire\Etiquetes\GeneradorEtiquetes;
 use App\Livewire\Mostres\Index;
 use App\Models\Mostra;
-use App\Models\QrEtiqueta;
 use App\Models\QrLot;
 use App\Models\User;
 use App\Services\MostraQrService;
 use App\Services\QrPreimpressioService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -114,7 +114,7 @@ class QrPreimpressioTest extends TestCase
         try {
             $servei->assignar($etiqueta->token, $segona);
             $this->fail('S’hauria d’impedir una segona assignació.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             $this->assertArrayHasKey('qrCodi', $e->errors());
         }
         $this->assertDatabaseHas('qr_etiquetes', ['id' => $etiqueta->id, 'mostra_id' => $primera->id]);

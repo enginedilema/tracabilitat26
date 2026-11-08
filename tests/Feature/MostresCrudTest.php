@@ -4,9 +4,8 @@ namespace Tests\Feature;
 
 use App\Livewire\Mostres\Index;
 use App\Models\Mostra;
-use App\Models\QrEtiqueta;
-use App\Services\QrPreimpressioService;
 use App\Models\User;
+use App\Services\QrPreimpressioService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;

@@ -33,7 +33,7 @@ return new class extends Migration
 
             // Control de recepció
             $table->boolean('recepcio_confirmada')
-                  ->default(false);
+                ->default(false);
 
             // Control de registre
             $table->timestamps();

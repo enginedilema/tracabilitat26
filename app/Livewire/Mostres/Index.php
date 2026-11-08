@@ -6,10 +6,10 @@ use App\Models\Mostra;
 use App\Models\MostraEsdeveniment;
 use App\Models\MostraProcessament;
 use App\Services\QrPreimpressioService;
-use Illuminate\Support\Str;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -19,28 +19,49 @@ class Index extends Component
     use WithPagination;
 
     public string $cerca = '';
+
     public string $filtreTipus = '';
+
     public string $filtreEstat = '';
+
     public string $filtreDesDe = '';
+
     public string $filtreFins = '';
+
     public bool $formulariObert = false;
+
     public ?int $editantId = null;
+
     public ?int $consultantId = null;
+
     public string $missatge = '';
 
     public string $qrCodi = '';
+
     public string $identificacio = '';
+
     public string $tipus_mostra = 'citologia';
+
     public string $genere = '';
+
     public ?string $edat = null;
+
     public string $motiu_sollicitud = '';
+
     public string $procedencia = '';
+
     public string $sollicitant = '';
+
     public string $data_entrada = '';
+
     public string $hora_entrada = '';
+
     public string $tipus_principal = '';
+
     public string $tipus_secundari = '';
+
     public string $organ_localitzacio = '';
+
     public bool $recepcio_confirmada = false;
 
     public function mount(): void
@@ -58,10 +79,25 @@ class Index extends Component
         $this->resetPage();
     }
 
-    public function updatedFiltreTipus(): void { $this->resetPage(); }
-    public function updatedFiltreEstat(): void { $this->resetPage(); }
-    public function updatedFiltreDesDe(): void { $this->resetPage(); }
-    public function updatedFiltreFins(): void { $this->resetPage(); }
+    public function updatedFiltreTipus(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFiltreEstat(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFiltreDesDe(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFiltreFins(): void
+    {
+        $this->resetPage();
+    }
 
     public function crear(): void
     {
@@ -156,10 +192,12 @@ class Index extends Component
                 $teProces = MostraProcessament::query()->where('mostra_id', $mostra->id)->exists();
                 if ($teProces && $dades['tipus_mostra'] !== $mostra->tipus_mostra) {
                     $this->addError('tipus_mostra', 'No es pot canviar el tipus amb un processament iniciat.');
+
                     return '';
                 }
                 if ($teProces && ! $dades['recepcio_confirmada']) {
                     $this->addError('recepcio_confirmada', 'No es pot retirar la recepció quan ja hi ha processament.');
+
                     return '';
                 }
 
@@ -181,6 +219,7 @@ class Index extends Component
                         'estat_nou' => $mostra->estat,
                     ]);
                 }
+
                 return 'Mostra actualitzada correctament.';
             }
 
@@ -197,6 +236,7 @@ class Index extends Component
                 'etiqueta_id' => $etiqueta->id,
                 'lot_id' => $etiqueta->lot_id,
             ]);
+
             return 'Mostra registrada correctament.';
         });
 
@@ -270,8 +310,8 @@ class Index extends Component
                 ->when($cerca !== '', function ($query) use ($cerca) {
                     $query->where(function ($q) use ($cerca) {
                         $q->where('identificacio', 'like', "%{$cerca}%")
-                          ->orWhere('procedencia', 'like', "%{$cerca}%")
-                          ->orWhere('sollicitant', 'like', "%{$cerca}%");
+                            ->orWhere('procedencia', 'like', "%{$cerca}%")
+                            ->orWhere('sollicitant', 'like', "%{$cerca}%");
                     });
                 })
                 ->orderByDesc('id')

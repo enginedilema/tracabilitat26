@@ -157,5 +157,4 @@ class QrPreimpressioService
 
         return $motiu;
     }
-
 }

@@ -1,11 +1,11 @@
 
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\EtiquetaA4Controller;
 use App\Models\Mostra;
 use App\Models\User;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
 
 // Pàgina inicial
 Route::view('/', 'welcome')->name('home');

@@ -37,7 +37,7 @@ class MostraQrController extends Controller
             margin: 12,
         );
 
-        $resultat = (new SvgWriter())->write($qrCode);
+        $resultat = (new SvgWriter)->write($qrCode);
 
         return response($resultat->getString(), 200, array_merge(
             ['Content-Type' => 'image/svg+xml; charset=UTF-8', 'X-Content-Type-Options' => 'nosniff'],
@@ -78,6 +78,7 @@ class MostraQrController extends Controller
         // Compatibilitat amb QR de la v0.6 assignats abans de la preimpressió.
         $mostra = Mostra::query()->where('qr_token', $token)->firstOrFail();
         Gate::authorize('view', $mostra);
+
         return redirect()->route('mostres.proces', $mostra);
     }
 

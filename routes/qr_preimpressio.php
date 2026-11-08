@@ -26,8 +26,8 @@ Route::middleware('auth')->group(function (): void {
 
     // Ruta principal: es fa servir amb route('etiquetes.a4', ['lot' => $lot->id]).
     Route::get('/etiquetes/lots/{lot}/a4', [EtiquetaA4Controller::class, 'lot'])
-    ->whereNumber('lot')
-    ->name('etiquetes.a4');
+        ->whereNumber('lot')
+        ->name('etiquetes.a4');
 
     // Compatibilitat amb els enllaços d'impressió de v0.8 i v0.9.
     // El paràmetre té un nom diferent per evitar vinculacions antigues de {lot}.

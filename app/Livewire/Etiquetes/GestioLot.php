@@ -14,10 +14,15 @@ use Livewire\Component;
 class GestioLot extends Component
 {
     public int $lotId;
+
     public ?int $etiquetaSeleccionada = null;
+
     public bool $anullarTot = false;
+
     public bool $confirmat = false;
+
     public string $motiuAnullacio = '';
+
     public string $missatge = '';
 
     public function mount(int $lotId): void

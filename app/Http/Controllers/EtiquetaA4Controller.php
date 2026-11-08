@@ -74,7 +74,7 @@ class EtiquetaA4Controller extends Controller
         abort_unless(ctype_digit($lot) && (int) $lot > 0, 404);
         $lot = QrLot::query()->findOrFail((int) $lot);
 
-        $writer = new SvgWriter();
+        $writer = new SvgWriter;
 
         $etiquetes = $lot->etiquetes()
             ->where('estat', 'disponible')

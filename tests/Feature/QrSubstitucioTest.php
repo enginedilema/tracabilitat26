@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\MostraQrService;
 use App\Services\QrPreimpressioService;
 use App\Services\QrSubstitucioService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
@@ -126,7 +127,7 @@ class QrSubstitucioTest extends TestCase
         try {
             app(QrSubstitucioService::class)->substituir($mostra, $nou->token, 'Etiqueta deteriorada');
             $this->fail('Només un administrador pot substituir el QR.');
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             $this->assertTrue(true);
         }
         $this->get(route('mostres.qr.substituir', $mostra))->assertForbidden();

@@ -36,6 +36,7 @@ class Proces extends Component
     public int $mostraId;
 
     public array $formulari = [];
+
     public string $missatge = '';
 
     public function mount(Mostra $mostra): void
@@ -174,6 +175,7 @@ class Proces extends Component
         if (is_int($valor) || is_float($valor)) {
             return (string) $valor;
         }
+
         return $valor;
     }
 
@@ -237,6 +239,7 @@ class Proces extends Component
                 return 'en_proces';
             }
         }
+
         return 'rebuda';
     }
 

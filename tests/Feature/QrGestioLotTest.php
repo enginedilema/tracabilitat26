@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Livewire\Etiquetes\GestioLot;
 use App\Models\Mostra;
-use App\Models\QrLot;
 use App\Models\User;
 use App\Services\QrPreimpressioService;
 use Illuminate\Foundation\Testing\RefreshDatabase;

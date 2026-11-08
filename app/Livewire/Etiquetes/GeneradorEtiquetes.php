@@ -13,8 +13,11 @@ use Livewire\Component;
 class GeneradorEtiquetes extends Component
 {
     public int $quantitat = 10;
+
     public string $cerca = '';
+
     public array $seleccionades = [];
+
     public array $copies = [];
 
     public function mount(): void
@@ -80,9 +83,9 @@ class GeneradorEtiquetes extends Component
         return Mostra::query()
             ->when($this->cerca !== '', function ($query) {
                 $query->where(function ($q) {
-                    $q->where('identificacio', 'like', '%' . $this->cerca . '%')
-                        ->orWhere('procedencia', 'like', '%' . $this->cerca . '%')
-                        ->orWhere('sollicitant', 'like', '%' . $this->cerca . '%');
+                    $q->where('identificacio', 'like', '%'.$this->cerca.'%')
+                        ->orWhere('procedencia', 'like', '%'.$this->cerca.'%')
+                        ->orWhere('sollicitant', 'like', '%'.$this->cerca.'%');
                 });
             })
             ->orderByDesc('data_entrada')

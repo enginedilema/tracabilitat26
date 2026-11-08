@@ -26,8 +26,7 @@ class ProgresMostraTest extends TestCase
             ])
         )
             ->test(Proces::class, ['mostra' => $mostra])
-            ->assertViewHas('progres', fn (array $p): bool =>
-                $p['completades'] === 1 && $p['total'] === 8 && $p['percentatge'] === 13
+            ->assertViewHas('progres', fn (array $p): bool => $p['completades'] === 1 && $p['total'] === 8 && $p['percentatge'] === 13
             )
             ->set('formulari.descripcio_macroscopica', 'Mostra de prova')
             ->set('formulari.descripcio_confirmada', true)
@@ -35,8 +34,7 @@ class ProgresMostraTest extends TestCase
             ->set('formulari.procediment_confirmat', true)
             ->call('guardar')
             ->assertHasNoErrors()
-            ->assertViewHas('progres', fn (array $p): bool =>
-                $p['completades'] === 3 && $p['total'] === 8 && $p['percentatge'] === 38
+            ->assertViewHas('progres', fn (array $p): bool => $p['completades'] === 3 && $p['total'] === 8 && $p['percentatge'] === 38
             );
     }
 

@@ -144,6 +144,7 @@ class CircuitMostresTest extends TestCase
             'recepcio_confirmada' => true,
         ]);
         $mostra->forceFill(['estat' => 'rebuda'])->save();
+
         return $mostra;
     }
 }

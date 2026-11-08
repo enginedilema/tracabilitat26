@@ -14,9 +14,13 @@ use Livewire\Component;
 class SubstituirQr extends Component
 {
     public int $mostraId;
+
     public string $qrNou = '';
+
     public string $motiu = '';
+
     public bool $confirmat = false;
+
     public string $missatge = '';
 
     public function mount(int $mostraId): void

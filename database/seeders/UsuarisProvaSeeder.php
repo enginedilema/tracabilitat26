@@ -19,8 +19,6 @@ class UsuarisProvaSeeder extends Seeder
 
         $password = config('tracabilitat.seed_password');
 
-
-
         $usuaris = [
             [
                 'name' => 'Administrador Prova',

@@ -14,11 +14,17 @@ use Livewire\Component;
 class UsuarisIndex extends Component
 {
     public string $nom = '';
+
     public string $email = '';
+
     public string $contrasenya = '';
+
     public string $rolNou = 'tecnic';
+
     public array $rols = [];
+
     public array $actius = [];
+
     public string $missatge = '';
 
     public function mount(): void
@@ -121,6 +127,7 @@ class UsuarisIndex extends Component
     public function render(): View
     {
         Gate::authorize('viewAny', User::class);
+
         return view('livewire.administracio.usuaris-index', [
             'usuaris' => User::query()->orderBy('name')->get(),
             'auditoria' => DB::table('usuari_auditoria')->orderByDesc('id')->limit(10)->get(),
