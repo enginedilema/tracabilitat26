@@ -64,8 +64,8 @@
             @foreach ($lot->etiquetes as $etiqueta)
                 <tr wire:key="etiqueta-{{ $etiqueta->id }}" class="border-b border-zinc-100 dark:border-zinc-800">
                     <td class="p-2 font-mono">{{ strtoupper(substr(str_replace('-', '', $etiqueta->token), -8)) }}</td>
-                    <td class="p-2">{{ match($etiqueta->estat) { 'disponible' => 'Disponible', 'assignat' => 'Assignat', 'anullat' => 'Anul·lat', default => $etiqueta->estat } }}</td>
-                    <td class="p-2">{{ $etiqueta->mostra?->identificacio ?? '—' }}</td>
+                    <td class="p-2">{{ $etiqueta->substitucioOrigen ? 'Substituït' : match($etiqueta->estat) { 'disponible' => 'Disponible', 'assignat' => 'Assignat', 'anullat' => 'Anul·lat', default => $etiqueta->estat } }}</td>
+                    <td class="p-2">{{ $etiqueta->mostra?->identificacio ?? $etiqueta->substitucioOrigen?->mostra?->identificacio ?? '—' }}</td>
                     <td class="p-2 text-xs">
                         @if ($etiqueta->estat === 'anullat')
                             {{ $etiqueta->motiu_anullacio ?? '—' }}
@@ -77,6 +77,9 @@
                     <td class="p-2">
                         @if ($etiqueta->estat === 'disponible' && $etiqueta->mostra_id === null)
                             <button type="button" wire:click="prepararEtiqueta({{ $etiqueta->id }})" class="text-rose-700 hover:underline dark:text-rose-300">Anul·lar</button>
+                        @elseif ($etiqueta->estat === 'assignat' && $etiqueta->mostra_id !== null)
+                            <a href="{{ route('mostres.qr.substituir', $etiqueta->mostra_id) }}"
+                               class="text-emerald-700 hover:underline dark:text-emerald-300">Substituir QR</a>
                         @else
                             <span class="text-xs text-zinc-500">No disponible</span>
                         @endif

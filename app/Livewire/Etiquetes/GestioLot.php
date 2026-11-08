@@ -88,7 +88,7 @@ class GestioLot extends Component
         Gate::authorize('viewAny', User::class);
 
         $lot = QrLot::query()->with([
-            'etiquetes' => fn ($query) => $query->with(['mostra', 'anullatPer'])->orderBy('id'),
+            'etiquetes' => fn ($query) => $query->with(['mostra', 'anullatPer', 'substitucioOrigen.mostra'])->orderBy('id'),
         ])->findOrFail($this->lotId);
 
         return view('livewire.etiquetes.gestio-lot', [

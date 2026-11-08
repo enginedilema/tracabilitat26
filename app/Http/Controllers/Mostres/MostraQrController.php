@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mostres;
 use App\Http\Controllers\Controller;
 use App\Models\Mostra;
 use App\Models\QrEtiqueta;
+use App\Models\QrSubstitucio;
 use App\Services\MostraQrService;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\QrCode;
@@ -65,6 +66,13 @@ class MostraQrController extends Controller
             Gate::authorize('view', $mostra);
 
             return redirect()->route('mostres.proces', $mostra);
+        }
+
+        // Els QR legacy retirats també retornen 410 sense exposar les dades de la mostra.
+        if (QrSubstitucio::query()
+            ->where('token_legacy_hash', hash('sha256', strtolower($token)))
+            ->exists()) {
+            abort(410, 'Aquest QR ha estat substituït.');
         }
 
         // Compatibilitat amb QR de la v0.6 assignats abans de la preimpressió.

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class QrEtiqueta extends Model
 {
@@ -24,6 +25,12 @@ class QrEtiqueta extends Model
     public function anullatPer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'anullat_per');
+    }
+
+    /** Vincle auditable a la mostra original quan el QR és substituït. */
+    public function substitucioOrigen(): HasOne
+    {
+        return $this->hasOne(QrSubstitucio::class, 'etiqueta_antiga_id');
     }
 
     public function mostra(): BelongsTo
