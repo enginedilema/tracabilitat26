@@ -110,10 +110,11 @@ final class DadesDashboard
                 ->get()
                 ->keyBy('mostra_id');
 
-            $recents = $mostresRecents->map(function (Mostra $mostra) use ($processaments): array {
+            $recents = [];
+            foreach ($mostresRecents as $mostra) {
                 $progres = ProgresMostra::calcular($mostra, $processaments->get($mostra->id));
 
-                return [
+                $recents[] = [
                     'id' => $mostra->id,
                     'identificacio' => $mostra->identificacio,
                     'tipus' => $mostra->tipus_mostra === 'citologia' ? 'Citologia' : 'Biòpsia',
@@ -122,30 +123,32 @@ final class DadesDashboard
                     'percentatge' => $progres['percentatge'],
                     'fases' => $progres['completades'].'/'.$progres['total'],
                 ];
-            })->all();
+            }
 
-            $activitat = MostraEsdeveniment::query()
+            $esdeveniments = MostraEsdeveniment::query()
                 ->with('mostra:id,identificacio')
                 ->orderByDesc('created_at')
                 ->orderByDesc('id')
                 ->limit(6)
-                ->get()
-                ->map(static function (MostraEsdeveniment $e): array {
-                    $noms = [
-                        'mostra_registrada' => 'Mostra registrada',
-                        'mostra_actualitzada' => 'Mostra modificada',
-                        'processament_actualitzat' => 'Processament modificat',
-                        'mostra_baixa' => 'Baixa de mostra',
-                    ];
+                ->get();
 
-                    return [
-                        'accio' => $noms[$e->accio] ?? str_replace('_', ' ', ucfirst($e->accio)),
-                        'usuari' => $e->usuari_nom ?: 'Usuari no identificat',
-                        'mostra' => $e->mostra?->identificacio ?? 'Mostra de baixa',
-                        'mostraId' => $e->mostra?->id,
-                        'data' => $e->created_at?->format('d/m/Y H:i') ?? '—',
-                    ];
-                })->all();
+            $activitat = [];
+            foreach ($esdeveniments as $e) {
+                $noms = [
+                    'mostra_registrada' => 'Mostra registrada',
+                    'mostra_actualitzada' => 'Mostra modificada',
+                    'processament_actualitzat' => 'Processament modificat',
+                    'mostra_baixa' => 'Baixa de mostra',
+                ];
+
+                $activitat[] = [
+                    'accio' => $noms[$e->accio] ?? str_replace('_', ' ', ucfirst($e->accio)),
+                    'usuari' => $e->usuari_nom ?: 'Usuari no identificat',
+                    'mostra' => $e->mostra->identificacio ?? 'Mostra de baixa',
+                    'mostraId' => $e->mostra?->id,
+                    'data' => $e->created_at?->format('d/m/Y H:i') ?? '—',
+                ];
+            }
 
             $dies = Mostra::query()
                 ->selectRaw('DATE(data_entrada) AS dia, COUNT(*) AS total')

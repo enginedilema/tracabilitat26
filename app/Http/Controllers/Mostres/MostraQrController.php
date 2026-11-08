@@ -82,6 +82,7 @@ class MostraQrController extends Controller
         return redirect()->route('mostres.proces', $mostra);
     }
 
+    /** @return array<string, string> */
     private function capcaleresPrivades(): array
     {
         return [

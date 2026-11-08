@@ -11,6 +11,7 @@ class QrLot extends Model
 
     protected $fillable = ['creat_per', 'quantitat'];
 
+    /** @return HasMany<QrEtiqueta, $this> */
     public function etiquetes(): HasMany
     {
         return $this->hasMany(QrEtiqueta::class, 'lot_id');

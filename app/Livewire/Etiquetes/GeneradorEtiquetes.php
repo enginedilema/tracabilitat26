@@ -7,6 +7,7 @@ use App\Models\QrLot;
 use App\Models\User;
 use App\Services\QrPreimpressioService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
@@ -16,8 +17,10 @@ class GeneradorEtiquetes extends Component
 
     public string $cerca = '';
 
+    /** @var list<int> */
     public array $seleccionades = [];
 
+    /** @var array<int, int> */
     public array $copies = [];
 
     public function mount(): void
@@ -78,7 +81,8 @@ class GeneradorEtiquetes extends Component
         return redirect()->route('etiquetes.mostres.a4');
     }
 
-    public function getMostresProperty()
+    /** @return Collection<int, Mostra> */
+    public function getMostresProperty(): Collection
     {
         return Mostra::query()
             ->when($this->cerca !== '', function ($query) {

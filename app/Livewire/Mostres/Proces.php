@@ -35,6 +35,7 @@ class Proces extends Component
     #[Locked]
     public int $mostraId;
 
+    /** @var array<string, mixed> */
     public array $formulari = [];
 
     public string $missatge = '';
@@ -141,6 +142,7 @@ class Proces extends Component
         $this->missatge = 'Processament desat i historial actualitzat.';
     }
 
+    /** @param array<string, mixed> $dades */
     private function protegirCanvis(Mostra $mostra, array $dades): void
     {
         $anterior = MostraProcessament::query()->where('mostra_id', $mostra->id)->first();
@@ -179,6 +181,7 @@ class Proces extends Component
         return $valor;
     }
 
+    /** @return array<string, array<int, mixed>> */
     private function regles(Mostra $mostra): array
     {
         $regles = [
@@ -243,6 +246,7 @@ class Proces extends Component
         return 'rebuda';
     }
 
+    /** @return array<string, mixed> */
     private function valorsInicials(): array
     {
         return [

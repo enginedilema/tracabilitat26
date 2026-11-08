@@ -21,8 +21,10 @@ class UsuarisIndex extends Component
 
     public string $rolNou = 'tecnic';
 
+    /** @var array<int, string> */
     public array $rols = [];
 
+    /** @var array<int, bool> */
     public array $actius = [];
 
     public string $missatge = '';
@@ -110,6 +112,10 @@ class UsuarisIndex extends Component
         $this->missatge = 'Permisos actualitzats correctament.';
     }
 
+    /**
+     * @param  array<string, mixed>|null  $abans
+     * @param  array<string, mixed>  $despres
+     */
     private function auditar(User $usuari, string $accio, ?array $abans, array $despres): void
     {
         DB::table('usuari_auditoria')->insert([

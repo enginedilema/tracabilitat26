@@ -29,7 +29,7 @@ class MostraQrService
         }
 
         return DB::transaction(function () use ($mostra): string {
-            $actual = Mostra::query()->lockForUpdate()->findOrFail($mostra->getKey());
+            $actual = Mostra::query()->lockForUpdate()->whereKey($mostra->getKey())->firstOrFail();
 
             if (! $actual->qr_token) {
                 $actual->forceFill(['qr_token' => (string) Str::uuid()])->save();

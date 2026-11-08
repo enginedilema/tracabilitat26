@@ -7,6 +7,7 @@ use App\Models\User;
 
 class MostraPolicy
 {
+    /** @param list<string> $rols */
     private function habilitat(User $user, array $rols): bool
     {
         return (bool) $user->actiu && in_array($user->rol, $rols, true);

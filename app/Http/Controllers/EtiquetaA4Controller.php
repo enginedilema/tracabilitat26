@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Mostra;
+use App\Models\QrEtiqueta;
 use App\Models\QrLot;
 use App\Models\User;
 use Endroid\QrCode\ErrorCorrectionLevel;
@@ -22,18 +23,40 @@ class EtiquetaA4Controller extends Controller
     {
         Gate::authorize('viewAny', Mostra::class);
 
-        $items = collect($request->session()->get('etiquetes_a4.items', []))
-            ->filter(fn ($item) => is_array($item) && isset($item['mostra_id']))
-            ->take(100);
+        $rawItems = $request->session()->get('etiquetes_a4.items', []);
+        abort_unless(is_array($rawItems), 404, 'Selecciona mostres abans de generar les etiquetes.');
 
-        abort_if($items->isEmpty(), 404, 'Selecciona mostres abans de generar les etiquetes.');
+        /** @var list<array{mostra_id: int, copies: int}> $items */
+        $items = [];
+        foreach ($rawItems as $item) {
+            if (! is_array($item) || ! isset($item['mostra_id']) || ! is_numeric($item['mostra_id'])) {
+                continue;
+            }
+
+            $id = (int) $item['mostra_id'];
+            if ($id < 1) {
+                continue;
+            }
+
+            $items[] = [
+                'mostra_id' => $id,
+                'copies' => min(10, max(1, (int) ($item['copies'] ?? 1))),
+            ];
+
+            if (count($items) >= 100) {
+                break;
+            }
+        }
+
+        abort_if($items === [], 404, 'Selecciona mostres abans de generar les etiquetes.');
 
         $mostres = Mostra::query()
-            ->whereIn('id', $items->pluck('mostra_id')->map(fn ($id) => (int) $id))
+            ->whereIn('id', array_column($items, 'mostra_id'))
             ->get()
             ->keyBy('id');
 
-        $etiquetes = collect();
+        /** @var list<Mostra> $etiquetes */
+        $etiquetes = [];
 
         foreach ($items as $item) {
             $mostra = $mostres->get((int) $item['mostra_id']);
@@ -44,18 +67,20 @@ class EtiquetaA4Controller extends Controller
 
             Gate::authorize('view', $mostra);
 
-            $copies = min(10, max(1, (int) ($item['copies'] ?? 1)));
+            $copies = $item['copies'];
 
-            for ($i = 0; $i < $copies && $etiquetes->count() < 100; $i++) {
-                $etiquetes->push($mostra);
+            for ($i = 0; $i < $copies && count($etiquetes) < 100; $i++) {
+                $etiquetes[] = $mostra;
             }
 
-            if ($etiquetes->count() >= 100) {
+            if (count($etiquetes) >= 100) {
                 break;
             }
         }
 
-        abort_if($etiquetes->isEmpty(), 404, 'No s’han trobat mostres per imprimir.');
+        abort_if($etiquetes === [], 404, 'No s’han trobat mostres per imprimir.');
+
+        $etiquetes = collect($etiquetes);
 
         return response()->view('etiquetes.a4', compact('etiquetes'))
             ->header('Cache-Control', 'private, no-store, max-age=0')
@@ -81,7 +106,7 @@ class EtiquetaA4Controller extends Controller
             ->whereNull('mostra_id')
             ->orderBy('id')
             ->get()
-            ->map(function ($etiqueta) use ($writer): array {
+            ->map(function (QrEtiqueta $etiqueta) use ($writer): array {
                 $qr = new QrCode(
                     data: $etiqueta->token,
                     errorCorrectionLevel: ErrorCorrectionLevel::Medium,

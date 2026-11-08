@@ -34,7 +34,7 @@ class QrSubstitucioService
         }
 
         return DB::transaction(function () use ($mostra, $tokenNou, $motiu): QrSubstitucio {
-            $actual = Mostra::query()->lockForUpdate()->findOrFail($mostra->getKey());
+            $actual = Mostra::query()->lockForUpdate()->whereKey($mostra->getKey())->firstOrFail();
 
             if ($actual->estat === 'arxivada') {
                 throw ValidationException::withMessages([

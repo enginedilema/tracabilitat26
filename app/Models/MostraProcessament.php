@@ -43,6 +43,7 @@ class MostraProcessament extends Model
         ];
     }
 
+    /** @return BelongsTo<Mostra, $this> */
     public function mostra(): BelongsTo
     {
         return $this->belongsTo(Mostra::class);
