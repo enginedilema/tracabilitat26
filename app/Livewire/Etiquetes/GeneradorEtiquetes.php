@@ -34,7 +34,7 @@ class GeneradorEtiquetes extends Component
 
         $lot = $servei->crearLot($this->quantitat);
 
-        return redirect()->route('etiquetes.a4', ['lot' => $lot->id]);
+        return redirect()->route('etiquetes.a4.lot', ['lot' => $lot->id]);
     }
 
     // Selecció de mostres per imprimir les seves etiquetes.

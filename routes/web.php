@@ -3,8 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\EtiquetaA4Controller;
-use App\Models\Mostra;
-use App\Models\User;
+use App\Livewire\Etiquetes\GeneradorEtiquetes;
 
 // Pàgina inicial
 Route::view('/', 'welcome')->name('home');
@@ -32,14 +31,25 @@ Route::middleware(['auth'])->group(function () {
         return view('administracio.usuaris');
     })->name('usuaris.index');
 
-    // Etiquetes de mostres registrades (des de la selecció i la sessió).
-    // La ruta de lots QR es defineix a routes/qr_preimpressio.php.
-    Route::get('/etiquetes/a4', [EtiquetaA4Controller::class, 'index'])
-        ->name('etiquetes.mostres.a4');
+Route::get('/mostres/{mostra}/proces', function (\App\Models\Mostra $mostra) {
+    return view('mostres.proces', compact('mostra'));
+})
+    ->middleware('auth')
+    ->name('mostres.proces');
 
-});
+    
+    Route::middleware('auth')->group(function () {
+        Route::get('/etiquetes', GeneradorEtiquetes::class)
+            ->name('etiquetes.index');
+<<<<<<< HEAD
 
-// Rutes de configuració
+=======
+    
+        Route::get('/etiquetes/a4', [EtiquetaA4Controller::class, 'index'])
+            ->name('etiquetes.a4');
+>>>>>>> fa41286a28c9f088fb5b9a68acbd117ed20126da
+    });
+
 require __DIR__.'/settings.php';
 
 // Rutes antigues de codis QR
